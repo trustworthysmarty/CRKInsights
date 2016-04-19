@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.v7.widget.CardView
+    android:id="@+id/card_view"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:card_view="http://schemas.android.com/apk/res-auto"
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content"
+    android:layout_gravity="center"
+    android:layout_margin="5dp"
+    card_view:cardCornerRadius="2dp"
+    card_view:cardPreventCornerOverlap="false"
+    card_view:contentPadding="10dp">
+
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <LinearLayout
+            android:layout_weight="3"
+            android:gravity="center"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+            <ImageView
+                android:src="@mipmap/steve_jobs"
+                android:scaleType="fitXY"
+                android:layout_alignParentTop="true"
+                android:layout_alignParentRight="true"
+                android:layout_width="100dp"
+                android:layout_height="100dp"/>
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:paddingLeft="10dp"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+            <TextView
+                android:id="@+id/cardacttitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:typeface="serif"
+                android:text="Title of item"
+                android:textStyle="bold"
+                android:textColor="#195788"
+                android:textSize="18sp"
+                />
+            <TextView
+                android:id="@+id/cardtitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="title"
+                android:textSize="14sp"
+                />
+            <LinearLayout
+                android:gravity="bottom"
+                android:layout_marginTop="5dp"
+                android:padding="5dp"
+                android:background="@drawable/bg_pdf_selector"
+                android:id="@+id/downloadBtnLayout"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content">
+                <ImageButton
+                    android:id="@+id/button"
+                    android:src="@mipmap/pdf_icon"
+                    android:padding="0dp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"/>
+                <TextView
+                    android:typeface="sans"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Download PDF Here"
+                    android:textColor="#000000"
+                    android:textSize="14sp"
+                    />
+            </LinearLayout>
+
+
+        </LinearLayout>
+
+
+
+
+        <View
+            android:visibility="gone"
+            android:id="@+id/horizontal_bar"
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_below="@+id/cardtitle"
+            android:layout_marginBottom="10dp"
+            android:layout_marginTop="10dp"
+            android:background="@color/colorBarOne"/>
+
+        <ImageView
+            android:layout_width="25dp"
+            android:layout_height="25dp"
+            android:layout_alignParentLeft="true"
+            android:visibility="gone"
+            android:layout_below="@+id/horizontal_bar"
+            />
+
+        <TextView
+            android:id="@+id/author"
+            android:visibility="gone"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_below="@+id/horizontal_bar"
+            android:text="--Author"
+            android:textSize="16sp"
+            android:textStyle="italic"
+            />
+
+    </LinearLayout>
+</android.support.v7.widget.CardView>

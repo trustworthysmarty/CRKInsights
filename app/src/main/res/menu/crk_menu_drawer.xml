@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+      <group android:checkableBehavior="single">
+            <item
+                android:id="@+id/homescreen"
+                android:checked="true"
+                android:icon="@mipmap/menu"
+                android:title="@string/crk_menu_home" />
+          <item
+              android:id="@+id/homescreen_pub"
+              android:checked="false"
+              android:icon="@mipmap/menu"
+              android:title="@string/crk_menu_home_pub" />
+
+            <item
+                android:id="@+id/services"
+                android:checked="false"
+                android:icon="@mipmap/menu"
+                android:title="@string/crk_menu_services" />
+          <item
+              android:id="@+id/contactus"
+              android:checked="false"
+              android:icon="@mipmap/menu"
+              android:title="@string/crk_menu_contact_us" />
+      </group>
+</menu>

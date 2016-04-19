@@ -1,0 +1,16 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context="com.example.vrs.collapsingtoolbardemo.MainActivity">
+    <item android:id="@+id/search"
+          android:title="Search"
+          android:icon="@mipmap/no_menu_icon"
+          app:showAsAction="collapseActionView|ifRoom"
+           />
+    <item android:id="@+id/search_cancel"
+          android:title="Search"
+          android:icon="@mipmap/search_cancel"
+          android:visible="false"
+          app:showAsAction="collapseActionView|ifRoom"
+        />
+</menu>

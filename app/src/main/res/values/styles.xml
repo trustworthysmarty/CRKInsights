@@ -1,0 +1,62 @@
+<resources>
+
+    <!-- Base application theme. -->
+    <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
+        <!-- Customize your theme here. -->
+        <item name="colorPrimary">@color/colorPrimary</item>
+        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
+        <item name="colorAccent">@color/colorAccent</item>
+        <item name="drawerArrowStyle">@style/DrawerArrowStyle</item>
+        <item name="searchViewStyle">@style/AppTheme.SearchView</item>
+    </style>
+
+    <style name="DrawerArrowStyle" parent="@style/Widget.AppCompat.DrawerArrowToggle">
+        <item name="spinBars">true</item>
+        <item name="color">@android:color/black</item>
+    </style>
+
+    <style name="AppTheme.NoActionBar">
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
+    </style>
+
+    <style name="AppTheme.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar"/>
+
+    <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.Light"/>
+
+    <style name="TabTextAppearance" parent="TextAppearance.Design.Tab">
+        <item name="textAllCaps">false</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textSize">18sp</item>
+    </style>
+
+    <style name="MyThemeOverlay.ActionBar" parent="ThemeOverlay.AppCompat.Dark.ActionBar">
+        <item name="searchViewStyle">@style/AppTheme.SearchView</item>
+    </style>
+
+    <style name="AppTheme.SearchView" parent="Widget.AppCompat.SearchView">
+        <item name="searchIcon">@mipmap/ic_launcher</item>
+        <!-- The layout for the search view. Be careful. -->
+        <!--<item name="layout">@layout/search_bar</item>-->
+        <!-- Background for the search query section (e.g. EditText) -->
+        <!-- <item name="queryBackground">@mipmap/ic_launcher</item>-->
+        <!-- Background for the actions section (e.g. voice, submit) -->
+        <!--<item name="submitBackground">@color/black</item>-->
+
+        <!--<item name="closeIcon">...</item>
+
+        <item name="searchIcon">...</item>
+
+        <item name="goIcon">...</item>-->
+
+        <!--<item name="voiceIcon">...</item>
+
+        <item name="commitIcon">...</item>
+
+        <item name="suggestionRowLayout">...</item>-->
+    </style>
+
+
+
+
+</resources>
