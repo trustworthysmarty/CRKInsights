@@ -17,6 +17,8 @@ import java.util.ArrayList;
  */
 public class CrkContactusCardAdapter extends RecyclerView.Adapter<CrkContactusCardAdapter.ViewHolder> {
 
+    // stes
+
     private Context mContext;
     ArrayList<String> list = new ArrayList<>();
 

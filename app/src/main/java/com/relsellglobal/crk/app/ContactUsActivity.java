@@ -21,6 +21,8 @@ public class ContactUsActivity extends AppCompatActivity {
     RecyclerView mRecyclerView;
     CrkContactusCardAdapter adapter;
 
+    // test
+
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
