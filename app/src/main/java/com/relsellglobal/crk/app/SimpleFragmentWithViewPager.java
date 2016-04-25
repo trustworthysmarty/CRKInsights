@@ -6,6 +6,7 @@ import android.os.Handler;
 import android.os.Message;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v4.view.ViewPager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -20,22 +21,15 @@ import com.relsellglobal.crk.app.customcomponents.CustomLinearLayoutDots;
 /**
  * Created by anilkukreti on 29/02/16.
  */
-public class SimpleFragment extends Fragment {
+public class SimpleFragmentWithViewPager extends Fragment {
 
-    ImageView mImageView;
+    ViewPager mViewPager;
 
+    CustomPagerAdapterForImageScroller mAdapter;
 
-
-    int []imageArr = {R.mipmap.banner_one_o,R.mipmap.banner_two_o,R.mipmap.banner_three_o};
-
-    int arrCount;
 
     boolean imageNotChange;
-
-    Animation fadeIn,fadeOut;
-    AnimationSet animation;
-
-    CustomLinearLayoutDots dotsLayout;
+    int imageCounter;
 
 
     private Handler myHandler = new Handler() {
@@ -43,28 +37,23 @@ public class SimpleFragment extends Fragment {
         @Override
         public void handleMessage(Message msg) {
             super.handleMessage(msg);
-            if(mImageView != null && imageArr != null && getActivity() != null) {
-                arrCount++;
-                if (arrCount == imageArr.length) {
-                    arrCount = 0;
-                }
-                if(arrCount >=0 && arrCount < imageArr.length) {
-                    //mImageView.startAnimation(fadeOut);
-                    //mImageView.startAnimation(fadeIn);
-                    dotsLayout.setmDifficultyLevel(arrCount);
-                    mImageView.setImageDrawable(getActivity().getResources().getDrawable(imageArr[arrCount]));
-
-                }
+            imageCounter++;
+            if(imageCounter > mAdapter.getCount()) {
+                imageCounter = 0;
             }
+            mViewPager.setCurrentItem(imageCounter,true);
+
         }
     };
+
+
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
          super.onCreateView(inflater, container, savedInstanceState);
-        View v = inflater.inflate(R.layout.simple_fragment_main,container,false);
-        mImageView  = (ImageView)v.findViewById(R.id.imageView);
-        dotsLayout = (CustomLinearLayoutDots)v.findViewById(R.id.dots_layout);
+        View v = inflater.inflate(R.layout.image_scroller,container,false);
+
+        mViewPager = (ViewPager)v.findViewById(R.id.pager);
 
         return v ;
     }
@@ -73,11 +62,12 @@ public class SimpleFragment extends Fragment {
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        dotsLayout.setmDifficultyLevel(arrCount);
-        fadeIn= AnimationUtils.loadAnimation(getActivity(), R.anim.slide_in_right);
-        //fadeOut= AnimationUtils.loadAnimation(getActivity(), R.anim.fade_out);
+
+        mAdapter = new CustomPagerAdapterForImageScroller(getActivity());
+        mViewPager.setCurrentItem(imageCounter,true);
+        mViewPager.setAdapter(mAdapter);
         new ImageChangerTask().execute();
-        //mImageView.setImageDrawable(getActivity().getResources().getDrawable(R.mipmap.banner_one));
+
     }
 
     public class ImageChangerTask extends AsyncTask<Void,Void,Void> {
@@ -88,7 +78,7 @@ public class SimpleFragment extends Fragment {
 
             while(isImageChanging()) {
                 try {
-                    Thread.sleep(3000);
+                    Thread.sleep(1000);
                     Message message = new Message();
                     myHandler.sendMessage(message);
                 } catch (InterruptedException e) {
@@ -100,6 +90,7 @@ public class SimpleFragment extends Fragment {
         }
     }
 
+
     public boolean isImageChanging() {
         return imageNotChange == false;
     }
@@ -109,4 +100,7 @@ public class SimpleFragment extends Fragment {
         super.onDestroyView();
         imageNotChange = true;
     }
+
+
+
 }

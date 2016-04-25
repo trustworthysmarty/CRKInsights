@@ -1,6 +1,7 @@
 package com.relsellglobal.crk.app.contentproviders;
 
 import android.content.ContentProvider;
+import android.content.ContentResolver;
 import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.Context;
@@ -33,16 +34,29 @@ public class QuotesProvider extends ContentProvider {
         public static final String FAVORITE="favorite";
     }
 
+    public static class ServicesTable {
+        public static final String URL = "content://" + PROVIDER_NAME + "/servicestable";
+        public static final Uri CONTENT_URI = Uri.parse(URL);
+        public static final String _ID = "_id";
+        public static final String DESC = "name";
+        public static final String CATEGORY = "category";
+        public static final String CATEGORY_ID = "category_id";
+        public static final String ISHEADER="isheader";
+    }
+
 
     private static HashMap<String, String> QUOTES_PROJECTION_MAP;
+    private static HashMap<String, String> SERVICES_PROJECTION_MAP;
 
     static final int QUOTE = 1;
+    static final int SERVICES = 2;
 
     static final UriMatcher uriMatcher;
 
     static {
         uriMatcher = new UriMatcher(UriMatcher.NO_MATCH);
         uriMatcher.addURI(PROVIDER_NAME, "quotestable", QUOTE);
+        uriMatcher.addURI(PROVIDER_NAME, "servicestable", SERVICES);
     }
 
     /**
@@ -51,7 +65,8 @@ public class QuotesProvider extends ContentProvider {
     private SQLiteDatabase db;
     static final String DATABASE_NAME = "QuotesDb";
     public static final String QUOTES_TABLE_NAME = "quotestable";
-    static final int DATABASE_VERSION = 4;
+    public static final String SERVICES_TABLE_NAME = "servicestable";
+    static final int DATABASE_VERSION = 5;
 
     static final String CREATE_QUOTE_DB_TABLE =
             " CREATE TABLE " + QUOTES_TABLE_NAME +
@@ -62,9 +77,13 @@ public class QuotesProvider extends ContentProvider {
                     QuotesTable.FAVORITE + " TEXT, " +
                     QuotesTable.CATEGORY_ID + "  TEXT NOT NULL);";
 
-
-
-
+    static final String CREATE_SERVICES_DB_TABLE =
+            " CREATE TABLE " + SERVICES_TABLE_NAME +
+                    " (" + ServicesTable._ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                    ServicesTable.DESC + " TEXT NOT NULL, " +
+                    ServicesTable.CATEGORY + " TEXT NOT NULL, " +
+                    ServicesTable.ISHEADER + " TEXT NOT NULL, " +
+                    ServicesTable.CATEGORY_ID + "  TEXT NOT NULL);";
 
     /**
      * Helper class that actually creates and manages
@@ -78,12 +97,14 @@ public class QuotesProvider extends ContentProvider {
         @Override
         public void onCreate(SQLiteDatabase db) {
             db.execSQL(CREATE_QUOTE_DB_TABLE);
+            db.execSQL(CREATE_SERVICES_DB_TABLE);
         }
 
         @Override
         public void onUpgrade(SQLiteDatabase db, int oldVersion,
                               int newVersion) {
             db.execSQL("DROP TABLE IF EXISTS " + QUOTES_TABLE_NAME);
+            db.execSQL("DROP TABLE IF EXISTS " + SERVICES_TABLE_NAME);
             onCreate(db);
         }
     }
@@ -107,16 +128,35 @@ public class QuotesProvider extends ContentProvider {
          */
         String tableName = getTableName(uri);
 
-        long rowID = db.insert(tableName, "", values);
-        /**
-         * If record is added successfully
-         */
-        if (rowID > 0) {
-            Uri _uri = ContentUris.withAppendedId(QuotesTable.CONTENT_URI, rowID);
-            getContext().getContentResolver().notifyChange(_uri, null);
-            return _uri;
-        }
-        throw new SQLException("Failed to add a record into " + uri);
+       if(tableName.equalsIgnoreCase(QUOTES_TABLE_NAME)) {
+           long rowID = db.insert(tableName, "", values);
+           /**
+            * If record is added successfully
+            */
+           if (rowID > 0) {
+               Uri _uri = ContentUris.withAppendedId(QuotesTable.CONTENT_URI, rowID);
+               ContentResolver cr = getContext().getContentResolver();
+               if(cr != null) {
+                   cr.notifyChange(_uri, null);
+               }
+               return _uri;
+           }
+           throw new SQLException("Failed to add a record into " + uri);
+       } else if(tableName.equalsIgnoreCase(SERVICES_TABLE_NAME)) {
+           long rowID = db.insert(tableName, "", values);
+           /**
+            * If record is added successfully
+            */
+           if (rowID > 0) {
+               Uri _uri = ContentUris.withAppendedId(ServicesTable.CONTENT_URI, rowID);
+               ContentResolver cr = getContext().getContentResolver();
+               if(cr != null) {
+                   cr.notifyChange(_uri, null);
+               }
+               return _uri;
+           }
+       }
+        return null;
     }
 
     @Override
@@ -130,6 +170,10 @@ public class QuotesProvider extends ContentProvider {
             case QUOTE:
                 qb.setTables(QUOTES_TABLE_NAME);
                 qb.setProjectionMap(QUOTES_PROJECTION_MAP);
+                break;
+            case SERVICES:
+                qb.setTables(SERVICES_TABLE_NAME);
+                qb.setProjectionMap(SERVICES_PROJECTION_MAP);
                 break;
             default:
                 throw new IllegalArgumentException("Unknown URI While query" + uri);
@@ -158,6 +202,9 @@ public class QuotesProvider extends ContentProvider {
             case QUOTE:
                 count = db.delete(QUOTES_TABLE_NAME, selection, selectionArgs);
                 break;
+            case SERVICES:
+                count = db.delete(SERVICES_TABLE_NAME, selection, selectionArgs);
+                break;
             default:
                 throw new IllegalArgumentException("Unknown URI " + uri);
         }
@@ -174,6 +221,10 @@ public class QuotesProvider extends ContentProvider {
         switch (uriMatcher.match(uri)) {
             case QUOTE:
                 count = db.update(QUOTES_TABLE_NAME, values,
+                        selection, selectionArgs);
+                break;
+            case SERVICES:
+                count = db.update(SERVICES_TABLE_NAME, values,
                         selection, selectionArgs);
                 break;
             default:
@@ -194,6 +245,9 @@ public class QuotesProvider extends ContentProvider {
         switch (res) {
             case QUOTE:
                 result = QUOTES_TABLE_NAME;
+                break;
+            case SERVICES:
+                result = SERVICES_TABLE_NAME;
                 break;
             default:
                 throw new IllegalArgumentException("Unsupported URI Name in table: " + uri);

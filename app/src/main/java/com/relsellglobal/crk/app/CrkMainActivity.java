@@ -34,7 +34,9 @@ import android.widget.FrameLayout;
 import com.relsellglobal.crk.app.contentproviders.QuotesProvider;
 import com.relsellglobal.crk.app.customcomponents.NonSwipableViewPager;
 import com.relsellglobal.crk.app.pojo.QuotesListItem;
+import com.relsellglobal.crk.app.pojo.ServicesListItem;
 import com.relsellglobal.crk.app.util.Utility;
+import com.relsellglobal.crk.app.viewflipperscroller.SimpleFlipperFragment;
 
 
 import java.util.ArrayList;
@@ -53,6 +55,9 @@ public class CrkMainActivity extends AppCompatActivity implements LoaderManager.
 
     NavigationView mNavigationView;
 
+    public static final int SERVICES_ACTIVITY_START_CODE = 9001;
+    public static final int CONTACTUS_ACTIVITY_START_CODE = 9002;
+
     CollapsingToolbarLayout collapsingToolbarLayout;
     //FloatingActionButton floatingActionButton;
     int mutedColor = R.attr.colorPrimary;
@@ -65,8 +70,8 @@ public class CrkMainActivity extends AppCompatActivity implements LoaderManager.
     private TabLayout tabLayout;
     private NonSwipableViewPager viewPager;
     private FloatingActionButton floatingActionButton;
-    private AutoCompleteTextView mEditTextSearch;
     boolean searchOpen;
+    int menuPrevPosition;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -78,8 +83,9 @@ public class CrkMainActivity extends AppCompatActivity implements LoaderManager.
         mContentFrameLayoutTwo = (ViewPager) findViewById(R.id.viewpager);
         mAppBarLayout = (AppBarLayout) findViewById(R.id.app_bar_layout);
         toolbar.setTitle("");
-        mEditTextSearch = (AutoCompleteTextView) findViewById(R.id.editSearch);
-        addDummyDataToDBForSearch();
+        // do when required only
+        //addDummyDataToDBForSearch();
+        //addDummyDataToDBForServices();
 
         SimpleFragment fragment = new SimpleFragment();
 
@@ -155,16 +161,17 @@ public class CrkMainActivity extends AppCompatActivity implements LoaderManager.
                     }
                     // instructer viewpager to show relevant time
                     viewPager.setCurrentItem(1);
-                } else if (id == R.id.contactus){
+                } else if (id == R.id.contactus) {
                     Bundle b = new Bundle();
-                    b.putString("quoteText","Anil");
-                    selectItem(4,b);
-                } else if (id == R.id.services){
+                    b.putString("quoteText", "Anil");
+                    selectItem(4, b);
+                } else if (id == R.id.services) {
                     // inflate services here
                     Bundle b = new Bundle();
-                    b.putString("quoteText","Anil");
-                    selectItem(5,b);
+                    b.putString("quoteText", "Anil");
+                    selectItem(5, b);
                 }
+
                 return true;
             }
         });
@@ -190,6 +197,7 @@ public class CrkMainActivity extends AppCompatActivity implements LoaderManager.
 
 
         getDataFromDB(1);
+        getDataFromDB(2);
 
     }
 
@@ -211,15 +219,14 @@ public class CrkMainActivity extends AppCompatActivity implements LoaderManager.
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
             return true;
-        } else if (id == R.id.search_cancel){
-            mEditTextSearch.setVisibility(View.GONE);
+        } else if (id == R.id.search_cancel) {
+
             searchOpen = false;
             invalidateOptionsMenu();
         } else if (id == R.id.search) {
-            mEditTextSearch.setVisibility(View.VISIBLE);
+
             searchOpen = true;
             invalidateOptionsMenu();
-
 
 
             //SearchView searchView = (SearchView) MenuItemCompat.getActionView(item);
@@ -264,6 +271,12 @@ public class CrkMainActivity extends AppCompatActivity implements LoaderManager.
         return true;
     }
 
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        mNavigationView.setCheckedItem(R.id.homescreen);
+    }
+
     public void selectItem(int position, Bundle b) {
         Bundle args = new Bundle();
 
@@ -271,14 +284,14 @@ public class CrkMainActivity extends AppCompatActivity implements LoaderManager.
             case 4:
                 Intent i = new Intent(CrkMainActivity.this, ContactUsActivity.class);
                 i.putExtras(b);
-                startActivity(i);
+                startActivityForResult(i, CONTACTUS_ACTIVITY_START_CODE);
                 overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_right);
                 Drawer.closeDrawer(Gravity.LEFT);
                 break;
             case 5:
                 Intent i1 = new Intent(CrkMainActivity.this, ServicesActivity.class);
                 i1.putExtras(b);
-                startActivity(i1);
+                startActivityForResult(i1, SERVICES_ACTIVITY_START_CODE);
                 overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_right);
                 Drawer.closeDrawer(Gravity.LEFT);
                 break;
@@ -307,23 +320,6 @@ public class CrkMainActivity extends AppCompatActivity implements LoaderManager.
 
     private void setupViewPager(ViewPager viewPager) {
         ViewPagerAdapter adapter = new ViewPagerAdapter(getSupportFragmentManager());
-
-        // for cutom layout for tab section
-
-        /*LayoutInflater lI = this.getLayoutInflater();
-        View v = lI.inflate(R.layout.custom_tab_layout, null);
-        ((TextView) v.findViewById(R.id.textView1)).setText("RECENT LESSONS");
-        ((TextView) v.findViewById(R.id.tab_text)).setTextColor(Color.parseColor("#222222"));
-        ((LinearLayout) v.findViewById(R.id.ll)).setPressed(true);
-
-        View v1 = lI.inflate(R.layout.torrins_custom_recent_upcoming_lessons, null);
-        ((TextView) v1.findViewById(R.id.tab_text)).setText("UPCOMING");
-        ((TextView) v1.findViewById(R.id.tab_text)).setTextColor(Color.parseColor("#222222"));
-        ((LinearLayout) v1.findViewById(R.id.divider_ll)).setVisibility(View.GONE);
-
-
-        tabLayout.addTab(tabLayout.newTab().setCustomView(v));
-        tabLayout.addTab(tabLayout.newTab().setCustomView(v1));*/
 
 
         SlidingTabsBasicFragment slidingTabsBasicFragment = new SlidingTabsBasicFragment();
@@ -356,6 +352,8 @@ public class CrkMainActivity extends AppCompatActivity implements LoaderManager.
         String sortOrder = args.getString("sortOrder");
         if (id == 1) {
             CONTENT_URI = QuotesProvider.QuotesTable.CONTENT_URI;
+        } else if (id == 2) {
+            CONTENT_URI = QuotesProvider.ServicesTable.CONTENT_URI;
         }
         return new CursorLoader(this, CONTENT_URI, projection, selection, selectionArgs, sortOrder);
     }
@@ -363,22 +361,45 @@ public class CrkMainActivity extends AppCompatActivity implements LoaderManager.
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
 
-        ArrayList<QuotesListItem> list = new ArrayList<>();
-        if (data.getCount() != 0) {
-            while (data.moveToNext()) {
-                String desc = data.getString(data.getColumnIndexOrThrow(QuotesProvider.QuotesTable.DESC));
-                String author = data.getString(data.getColumnIndexOrThrow(QuotesProvider.QuotesTable.AUTHOR));
-                String categoryId = data.getString(data.getColumnIndexOrThrow(QuotesProvider.QuotesTable.CATEGORY_ID));
-                QuotesListItem qt = new QuotesListItem();
-                qt.setDescription(desc);
-                qt.setAuthor(author);
-                qt.setCategoryId(categoryId);
-                list.add(qt);
-            }
-        }
 
-        if (Utility.getInstance().getmListForStationaryQuotesData() == null) {
-            Utility.getInstance().setmListForStationaryQuotesData(list);
+        if(loader.getId() == 1) {
+            ArrayList<QuotesListItem> list = new ArrayList<>();
+            if (data.getCount() != 0) {
+                while (data.moveToNext()) {
+                    String desc = data.getString(data.getColumnIndexOrThrow(QuotesProvider.QuotesTable.DESC));
+                    String author = data.getString(data.getColumnIndexOrThrow(QuotesProvider.QuotesTable.AUTHOR));
+                    String categoryId = data.getString(data.getColumnIndexOrThrow(QuotesProvider.QuotesTable.CATEGORY_ID));
+                    QuotesListItem qt = new QuotesListItem();
+                    qt.setDescription(desc);
+                    qt.setAuthor(author);
+                    qt.setCategoryId(categoryId);
+                    list.add(qt);
+                }
+            }
+            if (Utility.getInstance().getmListForStationaryQuotesData() == null) {
+                Utility.getInstance().setmListForStationaryQuotesData(list);
+            }
+        } else if(loader.getId() == 2) {
+            ArrayList<ServicesListItem> list = new ArrayList<>();
+            if (data.getCount() != 0) {
+                while (data.moveToNext()) {
+                    String desc = data.getString(data.getColumnIndexOrThrow(QuotesProvider.ServicesTable.DESC));
+                    String categoryName = data.getString(data.getColumnIndexOrThrow(QuotesProvider.ServicesTable.CATEGORY));
+                    String categoryId = data.getString(data.getColumnIndexOrThrow(QuotesProvider.ServicesTable.CATEGORY_ID));
+
+                    String headerValue =  data.getString(data.getColumnIndexOrThrow(QuotesProvider.ServicesTable.ISHEADER));
+
+                    ServicesListItem qt = new ServicesListItem();
+                    qt.setDescription(desc);
+                    qt.setCategory(categoryName);
+                    qt.setCategoryId(categoryId);
+                    qt.setHeader(headerValue);
+                    list.add(qt);
+                }
+            }
+            if (Utility.getInstance().getmListForServicesData() == null) {
+                Utility.getInstance().setmListForServicesData(list);
+            }
         }
     }
 
@@ -424,6 +445,17 @@ public class CrkMainActivity extends AppCompatActivity implements LoaderManager.
                     QuotesProvider.QuotesTable.DESC,
                     QuotesProvider.QuotesTable.AUTHOR,
                     QuotesProvider.QuotesTable.CATEGORY_ID
+            });
+            b.putString("selection", null);
+            b.putStringArray("selectionArgs", null);
+            b.putString("sortOrder", null);
+        }else if(queryNo == 2) {
+            b.putStringArray("projection", new String[]{
+                    QuotesProvider.ServicesTable._ID,
+                    QuotesProvider.ServicesTable.DESC,
+                    QuotesProvider.ServicesTable.CATEGORY,
+                    QuotesProvider.ServicesTable.ISHEADER,
+                    QuotesProvider.ServicesTable.CATEGORY_ID
             });
             b.putString("selection", null);
             b.putStringArray("selectionArgs", null);
@@ -609,5 +641,263 @@ public class CrkMainActivity extends AppCompatActivity implements LoaderManager.
 
 
     }
+
+    public void addDummyDataToDBForServices() {
+
+        ArrayList<ServicesListItem> arrayList1 = new ArrayList<>();
+        ServicesListItem qt = new ServicesListItem();
+        qt.setDescription("Audit And Assurance Services");
+        qt.setCategory("Main");
+        qt.setCategoryId("0");
+        qt.setHeader("true");
+        arrayList1.add(qt);
+        qt = new ServicesListItem();
+        qt.setDescription("Statutory Audits");
+        qt.setCategory("Audit And Assurance Services");
+        qt.setCategoryId("1");
+        arrayList1.add(qt);
+        qt = new ServicesListItem();
+        qt.setDescription("Tax Audit");
+        qt.setCategory("Audit And Assurance Services");
+        qt.setCategoryId("1");
+        arrayList1.add(qt);
+        qt = new ServicesListItem();
+        qt.setDescription("Internal Management Audits");
+        qt.setCategory("Audit And Assurance Services");
+        qt.setCategoryId("1");
+        arrayList1.add(qt);
+        qt = new ServicesListItem();
+        qt.setDescription("Internal Control Review");
+        qt.setCategory("Audit And Assurance Services");
+        qt.setCategoryId("1");
+        arrayList1.add(qt);
+        qt = new ServicesListItem();
+        qt.setDescription("Due diligence");
+        qt.setCategory("Audit And Assurance Services");
+        qt.setCategoryId("1");
+        arrayList1.add(qt);
+        qt = new ServicesListItem();
+        qt.setDescription("System Audit");
+        qt.setCategory("Audit And Assurance Services");
+        qt.setCategoryId("1");
+        arrayList1.add(qt);
+        qt = new ServicesListItem();
+        qt.setDescription("Stock & Receivables Audit");
+        qt.setCategory("Audit And Assurance Services");
+        qt.setCategoryId("1");
+        arrayList1.add(qt);
+        qt = new ServicesListItem();
+        qt.setDescription("Forensic And Investigative");
+        qt.setCategory("Audit And Assurance Services");
+        qt.setCategoryId("1");
+        arrayList1.add(qt);
+        qt = new ServicesListItem();
+        qt.setDescription("Fixed Assets Audit");
+        qt.setCategory("Audit And Assurance Services");
+        qt.setCategoryId("1");
+        arrayList1.add(qt);
+        qt = new ServicesListItem();
+        qt.setDescription("TEV Study");
+        qt.setCategory("Audit And Assurance Services");
+        qt.setCategoryId("1");
+        arrayList1.add(qt);
+        qt = new ServicesListItem();
+        qt.setDescription("Direct And Indirect Taxation");
+        qt.setCategory("Main");
+        qt.setHeader("true");
+        qt.setCategoryId("0");
+        arrayList1.add(qt);
+        qt = new ServicesListItem();
+        qt.setDescription("Corporate and personal tax compliance including income-tax assessments, Appeals before the Commissioner (Appeals) and the Income-tax Appellate Tribunal");
+        qt.setCategory("Direct And Indirect Taxation");
+        qt.setCategoryId("2");
+        arrayList1.add(qt);
+        qt = new ServicesListItem();
+        qt.setDescription("International and Domestic Tax Planning");
+        qt.setCategory("Direct And Indirect Taxation");
+        qt.setCategoryId("2");
+        arrayList1.add(qt);
+        qt = new ServicesListItem();
+        qt.setDescription("Filing of Income-tax and Wealth-tax returns of residents and non-residents individuals, domestic and foreign companies and other entities");
+        qt.setCategory("Direct And Indirect Taxation");
+        qt.setCategoryId("2");
+        arrayList1.add(qt);
+        qt = new ServicesListItem();
+        qt.setDescription("Company Law Matters");
+        qt.setCategory("Main");
+        qt.setCategoryId("0");
+        qt.setHeader("true");
+        arrayList1.add(qt);
+        qt = new ServicesListItem();
+        qt.setDescription("Formation of Indian and Offshore Companies");
+        qt.setCategory("Company Law Matters");
+        qt.setCategoryId("3");
+        arrayList1.add(qt);
+        qt = new ServicesListItem();
+        qt.setDescription(" Advising on various matters under the Companies Act, 1956 including appearance before the Company Law Board");
+        qt.setCategory("Company Law Matters");
+        qt.setCategoryId("3");
+        arrayList1.add(qt);
+        qt = new ServicesListItem();
+        qt.setDescription("Assisting in Winding-up of companies/striking off the name from the Registrar of Companies under the Act.");
+        qt.setCategory("Company Law Matters");
+        qt.setCategoryId("3");
+        arrayList1.add(qt);
+        qt = new ServicesListItem();
+        qt.setDescription("  Maintenance of statutory records and registers as per Indian Companies Act.");
+        qt.setCategory("Company Law Matters");
+        qt.setCategoryId("3");
+        arrayList1.add(qt);
+
+        qt = new ServicesListItem();
+        qt.setDescription("Accounting & Related Consultancy");
+        qt.setCategory("Main");
+        qt.setCategoryId("0");
+        qt.setHeader("true");
+        arrayList1.add(qt);
+
+        qt = new ServicesListItem();
+        qt.setDescription("Design, implementation and review of accounting manuals including those of urban local bodies.");
+        qt.setCategory("Accounting & Related Consultancy");
+        qt.setCategoryId("4");
+        arrayList1.add(qt);
+
+        qt = new ServicesListItem();
+        qt.setDescription("Advice on various accounting issues including those related to Indian GAAPs, International GAAPs and US GAAPs.");
+        qt.setCategory("Accounting & Related Consultancy");
+        qt.setCategoryId("4");
+        arrayList1.add(qt);
+
+
+        qt = new ServicesListItem();
+        qt.setDescription("Business/Knowledge Process Outsourcing");
+        qt.setCategory("Main");
+        qt.setCategoryId("0");
+        qt.setHeader("true");
+        arrayList1.add(qt);
+
+
+        qt = new ServicesListItem();
+        qt.setDescription("Book keeping and preparation of final accounts.");
+        qt.setCategory("Business/Knowledge Process Outsourcing");
+        qt.setCategoryId("5");
+        arrayList1.add(qt);
+        qt = new ServicesListItem();
+        qt.setDescription("Payroll Processing.");
+        qt.setCategory("Business/Knowledge Process Outsourcing");
+        qt.setCategoryId("5");
+        arrayList1.add(qt);
+        qt = new ServicesListItem();
+        qt.setDescription("Preparation of management accounts and management information systems.");
+        qt.setCategory("Business/Knowledge Process Outsourcing");
+        qt.setCategoryId("5");
+        arrayList1.add(qt);
+        qt = new ServicesListItem();
+        qt.setDescription("Fixed Assets verification and completion of records.");
+        qt.setCategory("Business/Knowledge Process Outsourcing");
+        qt.setCategoryId("5");
+        arrayList1.add(qt);
+
+
+        qt = new ServicesListItem();
+        qt.setDescription("Foreign Exchange Management Act 1999, (FEMA)");
+        qt.setCategory("Main");
+        qt.setCategoryId("0");
+        qt.setHeader("true");
+        arrayList1.add(qt);
+
+        qt = new ServicesListItem();
+        qt.setDescription("Advice on various foreign exchange matters under the Act including in connection with that stemming from inbound investment into India and outbound investment outside India.");
+        qt.setCategory("Foreign Exchange Management Act 1999, (FEMA)");
+        qt.setCategoryId("6");
+        arrayList1.add(qt);
+        qt = new ServicesListItem();
+        qt.setDescription("Obtaining various approvals under the said Act from the Reserve Bank of India (RBI) and providing assistance in complying with requirement prescribed by the RBI.");
+        qt.setCategory("Foreign Exchange Management Act 1999, (FEMA)");
+        qt.setCategoryId("6");
+        arrayList1.add(qt);
+
+        qt = new ServicesListItem();
+        qt.setDescription("Corporate Advisory Services");
+        qt.setCategory("Main");
+        qt.setCategoryId("0");
+        qt.setHeader("true");
+        arrayList1.add(qt);
+
+
+        qt = new ServicesListItem();
+        qt.setDescription("Share Valuations.");
+        qt.setCategory("Corporate Advisory Services");
+        qt.setCategoryId("7");
+        arrayList1.add(qt);
+        qt = new ServicesListItem();
+        qt.setDescription("Mergers, Demergers and Acquisitions.");
+        qt.setCategory("Corporate Advisory Services");
+        qt.setCategoryId("7");
+        arrayList1.add(qt);
+        qt = new ServicesListItem();
+        qt.setDescription("Capital Restructuring.");
+        qt.setCategory("Corporate Advisory Services");
+        qt.setCategoryId("7");
+        arrayList1.add(qt);
+
+        qt = new ServicesListItem();
+        qt.setDescription("Personal Advisory Services");
+        qt.setCategory("Main");
+        qt.setCategoryId("0");
+        qt.setHeader("true");
+        arrayList1.add(qt);
+
+        qt = new ServicesListItem();
+        qt.setDescription("Personal financial planning.");
+        qt.setCategory("Personal Advisory Services");
+        qt.setCategoryId("8");
+        arrayList1.add(qt);
+        qt = new ServicesListItem();
+        qt.setDescription("Insurance and pension planning.");
+        qt.setCategory("Personal Advisory Services");
+        qt.setCategoryId("8");
+        arrayList1.add(qt);
+        qt = new ServicesListItem();
+        qt.setDescription("Formation of trusts.");
+        qt.setCategory("Personal Advisory Services");
+        qt.setCategoryId("8");
+        arrayList1.add(qt);
+        qt = new ServicesListItem();
+        qt.setDescription("Acting as arbitrator.");
+        qt.setCategory("Personal Advisory Services");
+        qt.setCategoryId("8");
+        arrayList1.add(qt);
+        qt = new ServicesListItem();
+        qt.setDescription("Wills.");
+        qt.setCategory("Personal Advisory Services");
+        qt.setCategoryId("8");
+        arrayList1.add(qt);
+        qt = new ServicesListItem();
+        qt.setDescription("Project Finance");
+        qt.setCategory("Main");
+        qt.setCategoryId("0");
+        qt.setHeader("true");
+        arrayList1.add(qt);
+        qt = new ServicesListItem();
+        qt.setDescription("Project report preparation for availing term loans and working capital loans from banks and financial institutions.");
+        qt.setCategory("Project Finance");
+        qt.setCategoryId("9");
+        arrayList1.add(qt);
+
+
+        for (ServicesListItem obj : arrayList1) {
+            ContentValues values = new ContentValues();
+            values.put(QuotesProvider.ServicesTable.DESC, obj.getDescription());
+            values.put(QuotesProvider.ServicesTable.CATEGORY, obj.getCategory());
+            values.put(QuotesProvider.ServicesTable.ISHEADER, ""+obj.isHeader());
+            values.put(QuotesProvider.ServicesTable.CATEGORY_ID, obj.getCategoryId());
+            Uri uri = getContentResolver().insert(QuotesProvider.ServicesTable.CONTENT_URI,
+                    values);
+        }
+
+
+    }
+
 
 }

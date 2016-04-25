@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+             android:layout_width="match_parent"
+             android:layout_height="match_parent">
+
+    <ImageView
+        android:id="@+id/imageView"
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="390dp"
+        android:layout_height="250dp"
+        android:src="@mipmap/banner_three_o"
+        android:scaleType="fitXY"
+        />
+    <LinearLayout
+        android:gravity="bottom"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+        <com.relsellglobal.crk.app.customcomponents.CustomLinearLayoutDots
+            android:id="@+id/dots_layout"
+            android:layout_width="match_parent"
+            android:layout_height="50dp">
+        </com.relsellglobal.crk.app.customcomponents.CustomLinearLayoutDots>
+    </LinearLayout>
+</FrameLayout>

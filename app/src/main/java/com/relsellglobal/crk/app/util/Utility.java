@@ -7,6 +7,7 @@ import android.widget.Toast;
 
 
 import com.relsellglobal.crk.app.pojo.QuotesListItem;
+import com.relsellglobal.crk.app.pojo.ServicesListItem;
 
 import java.util.ArrayList;
 
@@ -23,6 +24,18 @@ public class Utility extends Application {
     private boolean showDBToastMsg = true;
 
     private ArrayList<QuotesListItem> mListForStationaryQuotesData;
+
+
+    private ArrayList<ServicesListItem> mListForServicesData;
+
+
+    public ArrayList<ServicesListItem> getmListForServicesData() {
+        return mListForServicesData;
+    }
+
+    public void setmListForServicesData(ArrayList<ServicesListItem> mListForServicesData) {
+        this.mListForServicesData = mListForServicesData;
+    }
 
     public ArrayList<QuotesListItem> getmListForStationaryQuotesData() {
         return mListForStationaryQuotesData;

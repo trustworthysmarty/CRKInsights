@@ -1,0 +1,13 @@
+<LinearLayout  xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+    <ImageView
+        android:id="@+id/imgView"
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        android:src="@mipmap/banner_one_o"
+        android:layout_width="410dp"
+        android:layout_height="250dp"
+        android:scaleType="fitXY"
+        />
+</LinearLayout>
+

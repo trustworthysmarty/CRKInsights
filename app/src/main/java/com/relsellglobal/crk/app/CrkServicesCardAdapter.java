@@ -9,6 +9,10 @@ import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.relsellglobal.crk.app.pojo.ServicesListItem;
+
+import org.w3c.dom.Text;
+
 import java.util.ArrayList;
 
 
@@ -18,30 +22,43 @@ import java.util.ArrayList;
 public class CrkServicesCardAdapter extends RecyclerView.Adapter<CrkServicesCardAdapter.ViewHolder> {
 
     private Context mContext;
-    ArrayList<String> list = new ArrayList<>();
-
+    ArrayList<ServicesListItem> list = new ArrayList<>();
+    ArrayList<ServicesListItem> modifiedHeaderlist = new ArrayList<>();
+    int modifiedHeaderListCounter;
     public static final int HEADER = 1;
     public static final int CHILD = 2;
+    private ArrayList<String> categoryArray;
+    private int categoryCount;
 
 
-    public CrkServicesCardAdapter(Context mContext, ArrayList<String> list) {
+    public CrkServicesCardAdapter(Context mContext, ArrayList<ServicesListItem> list) {
         this.mContext = mContext;
         this.list = list;
+        categoryCountCalculate();
     }
+
+    public void categoryCountCalculate() {
+        for (ServicesListItem obj: list) {
+            String categoryId = obj.getCategoryId();
+            if(categoryId.equalsIgnoreCase("0")) {
+                modifiedHeaderlist.add(obj);
+                categoryCount++;
+            }
+        }
+    }
+
 
 
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
 
         View itemView = null;
-        switch(viewType) {
-            case HEADER:
-                itemView = LayoutInflater.from(parent.getContext())
-                        .inflate(R.layout.crk_services_listitem_header, parent, false);
-                return new ViewHolder(itemView,HEADER);
-            default:
-                return null;
-        }
+
+        itemView = LayoutInflater.from(parent.getContext())
+                .inflate(R.layout.crk_services_listitem_header, parent, false);
+        return new ViewHolder(itemView, HEADER);
+
+
     }
 
     @Override
@@ -49,35 +66,41 @@ public class CrkServicesCardAdapter extends RecyclerView.Adapter<CrkServicesCard
 
         int viewType = holder.getItemViewType();
 
-        String []configStringAddressArray = null;
+        /*ArrayList<String> configStringAddressArray = null;
         String configFaxStr = null;
         String configEmailStr = null;
         String configPhoneStr = null;
-        if(position == 0) {
-            configStringAddressArray = new String[] {"Statutory Audits","Tax Audit","Internal Management Audits","Internal Control Review","Due-diligence","Systems Audit","Stock & Receivables Audit","Forensic & Investigative Audit","Fixed Assets Audit","TEV Study"
-            };
-            configFaxStr = "+91-40-23552304";
-        } else if(position == 1) {
-            configStringAddressArray = new String[] {"Statutory Audits","Tax Audit","Internal Management Audits","Internal Control Review","Due-diligence","Systems Audit","Stock & Receivables Audit","Forensic & Investigative Audit","Fixed Assets Audit","TEV Study"
-            };
-        }
+        if (position == 0) {
+            configStringAddressArray = getStringArrData(2);
+            categoryArray = getStringArrData(3);
 
+        } else if (position == 1) {
 
-        switch (viewType) {
-            case HEADER:
-                int k = configStringAddressArray.length;
-                ArrayList<TextView> list = new ArrayList<>();
+        }*/
+
+        if (holder.headerTv != null) {
+            if (modifiedHeaderListCounter < modifiedHeaderlist.size()) {
+                ServicesListItem obj = modifiedHeaderlist.get(modifiedHeaderListCounter);
+                if (obj.isHeader().equalsIgnoreCase("true")) {
+                    holder.headerTv.setText(obj.getDescription());
+                    modifiedHeaderListCounter++;
+                }
                 TextView tv = null;
-                for(int i=0;i<k;i++) {
+                ArrayList<String> childList = new ArrayList();
+                String categoryName = obj.getDescription();
+                for (ServicesListItem obj1 : list) {
+                    if (obj1.getCategory().equalsIgnoreCase(categoryName)) {
+                        childList.add(obj1.getDescription());
+                    }
+                }
+                for (int i = 0; i < childList.size(); i++) {
                     tv = new TextView(mContext);
                     tv.setTextColor(Color.BLACK);
-                    String str = "\u2799 "+configStringAddressArray[i];
+                    String str = "\u2799 " + childList.get(i);
                     tv.setText(str);
-                    //list.add(tv);
                     holder.mDynamicAddressLayout.addView(tv);
                 }
-
-                break;
+            }
         }
 
     }
@@ -89,40 +112,49 @@ public class CrkServicesCardAdapter extends RecyclerView.Adapter<CrkServicesCard
 
     @Override
     public int getItemCount() {
-        return 2;
+        return categoryCount;
     }
 
 
+    public ArrayList<String> getStringArrData(int dataVar) {
+
+        ArrayList<String> result = new ArrayList<>();
+        if (dataVar == 2) {
+            for (ServicesListItem obj : list) {
+                result.add(obj.getDescription());
+            }
+        } else if (dataVar == 3) {
+            for (ServicesListItem obj : list) {
+                if (!result.contains(obj.getCategory())) {
+                    result.add(obj.getCategory());
+                }
+            }
+        }
+        return result;
+
+    }
 
 
     // viewholder class
-
 
 
     public class ViewHolder extends RecyclerView.ViewHolder {
 
         LinearLayout mDynamicAddressLayout;
 
-        public ViewHolder(View itemView,int type) {
+        // header Ux element
+        TextView headerTv;
+
+
+        // child ux elements
+        TextView childTv;
+
+        public ViewHolder(View itemView, int type) {
             super(itemView);
-            switch(type) {
-                case HEADER:
-                    mDynamicAddressLayout = (LinearLayout) itemView.findViewById(R.id.address_layout);
-                    break;
-                default:
-                    break;
-
-            }
+            headerTv = (TextView) itemView.findViewById(R.id.headoffice_tv);
+            mDynamicAddressLayout = (LinearLayout)itemView.findViewById(R.id.address_layout);
         }
     }
 
-
-    @Override
-    public int getItemViewType(int position) {
-        switch (position) {
-            default:
-                return HEADER;
-        }
-    }
 }
 
