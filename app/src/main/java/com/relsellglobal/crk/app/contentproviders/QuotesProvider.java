@@ -44,12 +44,24 @@ public class QuotesProvider extends ContentProvider {
         public static final String ISHEADER="isheader";
     }
 
+    public static class ContactsUsTable {
+        public static final String URL = "content://" + PROVIDER_NAME + "/contactustable";
+        public static final Uri CONTENT_URI = Uri.parse(URL);
+        public static final String _ID = "_id";
+        public static final String DESC = "name";
+        public static final String CATEGORY = "category";
+        public static final String CATEGORY_ID = "category_id";
+        public static final String ISHEADER="isheader";
+    }
+
 
     private static HashMap<String, String> QUOTES_PROJECTION_MAP;
     private static HashMap<String, String> SERVICES_PROJECTION_MAP;
+    private static HashMap<String, String> CONTACTUS_PROJECTION_MAP;
 
     static final int QUOTE = 1;
     static final int SERVICES = 2;
+    static final int CONTACTUS = 3;
 
     static final UriMatcher uriMatcher;
 
@@ -57,6 +69,7 @@ public class QuotesProvider extends ContentProvider {
         uriMatcher = new UriMatcher(UriMatcher.NO_MATCH);
         uriMatcher.addURI(PROVIDER_NAME, "quotestable", QUOTE);
         uriMatcher.addURI(PROVIDER_NAME, "servicestable", SERVICES);
+        uriMatcher.addURI(PROVIDER_NAME, "contactustable", CONTACTUS);
     }
 
     /**
@@ -66,7 +79,8 @@ public class QuotesProvider extends ContentProvider {
     static final String DATABASE_NAME = "QuotesDb";
     public static final String QUOTES_TABLE_NAME = "quotestable";
     public static final String SERVICES_TABLE_NAME = "servicestable";
-    static final int DATABASE_VERSION = 5;
+    public static final String CONTACTUS_TABLE_NAME = "contactustable";
+    static final int DATABASE_VERSION = 6;
 
     static final String CREATE_QUOTE_DB_TABLE =
             " CREATE TABLE " + QUOTES_TABLE_NAME +
@@ -79,6 +93,14 @@ public class QuotesProvider extends ContentProvider {
 
     static final String CREATE_SERVICES_DB_TABLE =
             " CREATE TABLE " + SERVICES_TABLE_NAME +
+                    " (" + ServicesTable._ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                    ServicesTable.DESC + " TEXT NOT NULL, " +
+                    ServicesTable.CATEGORY + " TEXT NOT NULL, " +
+                    ServicesTable.ISHEADER + " TEXT NOT NULL, " +
+                    ServicesTable.CATEGORY_ID + "  TEXT NOT NULL);";
+
+    static final String CREATE_CONTACTUS_DB_TABLE =
+            " CREATE TABLE " + CONTACTUS_TABLE_NAME +
                     " (" + ServicesTable._ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
                     ServicesTable.DESC + " TEXT NOT NULL, " +
                     ServicesTable.CATEGORY + " TEXT NOT NULL, " +
@@ -98,6 +120,7 @@ public class QuotesProvider extends ContentProvider {
         public void onCreate(SQLiteDatabase db) {
             db.execSQL(CREATE_QUOTE_DB_TABLE);
             db.execSQL(CREATE_SERVICES_DB_TABLE);
+            db.execSQL(CREATE_CONTACTUS_DB_TABLE);
         }
 
         @Override
@@ -105,6 +128,7 @@ public class QuotesProvider extends ContentProvider {
                               int newVersion) {
             db.execSQL("DROP TABLE IF EXISTS " + QUOTES_TABLE_NAME);
             db.execSQL("DROP TABLE IF EXISTS " + SERVICES_TABLE_NAME);
+            db.execSQL("DROP TABLE IF EXISTS " + CONTACTUS_TABLE_NAME);
             onCreate(db);
         }
     }
@@ -155,6 +179,19 @@ public class QuotesProvider extends ContentProvider {
                }
                return _uri;
            }
+       }  else if(tableName.equalsIgnoreCase(CONTACTUS_TABLE_NAME)) {
+           long rowID = db.insert(tableName, "", values);
+           /**
+            * If record is added successfully
+            */
+           if (rowID > 0) {
+               Uri _uri = ContentUris.withAppendedId(ContactsUsTable.CONTENT_URI, rowID);
+               ContentResolver cr = getContext().getContentResolver();
+               if(cr != null) {
+                   cr.notifyChange(_uri, null);
+               }
+               return _uri;
+           }
        }
         return null;
     }
@@ -174,6 +211,10 @@ public class QuotesProvider extends ContentProvider {
             case SERVICES:
                 qb.setTables(SERVICES_TABLE_NAME);
                 qb.setProjectionMap(SERVICES_PROJECTION_MAP);
+                break;
+            case CONTACTUS:
+                qb.setTables(CONTACTUS_TABLE_NAME);
+                qb.setProjectionMap(CONTACTUS_PROJECTION_MAP);
                 break;
             default:
                 throw new IllegalArgumentException("Unknown URI While query" + uri);
@@ -205,6 +246,9 @@ public class QuotesProvider extends ContentProvider {
             case SERVICES:
                 count = db.delete(SERVICES_TABLE_NAME, selection, selectionArgs);
                 break;
+            case CONTACTUS:
+                count = db.delete(CONTACTUS_TABLE_NAME, selection, selectionArgs);
+                break;
             default:
                 throw new IllegalArgumentException("Unknown URI " + uri);
         }
@@ -225,6 +269,10 @@ public class QuotesProvider extends ContentProvider {
                 break;
             case SERVICES:
                 count = db.update(SERVICES_TABLE_NAME, values,
+                        selection, selectionArgs);
+                break;
+            case CONTACTUS:
+                count = db.update(CONTACTUS_TABLE_NAME, values,
                         selection, selectionArgs);
                 break;
             default:
@@ -249,11 +297,12 @@ public class QuotesProvider extends ContentProvider {
             case SERVICES:
                 result = SERVICES_TABLE_NAME;
                 break;
+            case CONTACTUS:
+                result = CONTACTUS_TABLE_NAME;
+                break;
             default:
                 throw new IllegalArgumentException("Unsupported URI Name in table: " + uri);
         }
         return result;
     }
-
-
 }

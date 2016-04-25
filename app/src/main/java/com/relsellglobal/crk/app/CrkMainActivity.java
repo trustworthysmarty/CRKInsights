@@ -33,6 +33,7 @@ import android.widget.FrameLayout;
 
 import com.relsellglobal.crk.app.contentproviders.QuotesProvider;
 import com.relsellglobal.crk.app.customcomponents.NonSwipableViewPager;
+import com.relsellglobal.crk.app.pojo.ContactUsListItem;
 import com.relsellglobal.crk.app.pojo.QuotesListItem;
 import com.relsellglobal.crk.app.pojo.ServicesListItem;
 import com.relsellglobal.crk.app.util.Utility;
@@ -72,6 +73,7 @@ public class CrkMainActivity extends AppCompatActivity implements LoaderManager.
     private FloatingActionButton floatingActionButton;
     boolean searchOpen;
     int menuPrevPosition;
+    public static String mDbPerfsFileName = "crk_db_perfs";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -83,9 +85,14 @@ public class CrkMainActivity extends AppCompatActivity implements LoaderManager.
         mContentFrameLayoutTwo = (ViewPager) findViewById(R.id.viewpager);
         mAppBarLayout = (AppBarLayout) findViewById(R.id.app_bar_layout);
         toolbar.setTitle("");
-        // do when required only
-        //addDummyDataToDBForSearch();
-        //addDummyDataToDBForServices();
+
+        String dbcreatedValue = Utility.getInstance().getDataFromPefs(mDbPerfsFileName,"dbcreated");
+        if((dbcreatedValue == null) || (dbcreatedValue != null && dbcreatedValue.equalsIgnoreCase("false"))) {
+            addDummyDataToDBForSearch();
+            addDummyDataToDBForServices();
+            addDummyDataToDBForContactUs();
+            Utility.getInstance().writeToPrefs(mDbPerfsFileName,"dbcreated","true");
+        }
 
         SimpleFragment fragment = new SimpleFragment();
 
@@ -198,6 +205,7 @@ public class CrkMainActivity extends AppCompatActivity implements LoaderManager.
 
         getDataFromDB(1);
         getDataFromDB(2);
+        getDataFromDB(3);
 
     }
 
@@ -354,6 +362,8 @@ public class CrkMainActivity extends AppCompatActivity implements LoaderManager.
             CONTENT_URI = QuotesProvider.QuotesTable.CONTENT_URI;
         } else if (id == 2) {
             CONTENT_URI = QuotesProvider.ServicesTable.CONTENT_URI;
+        } else if (id == 3) {
+            CONTENT_URI = QuotesProvider.ContactsUsTable.CONTENT_URI;
         }
         return new CursorLoader(this, CONTENT_URI, projection, selection, selectionArgs, sortOrder);
     }
@@ -399,6 +409,27 @@ public class CrkMainActivity extends AppCompatActivity implements LoaderManager.
             }
             if (Utility.getInstance().getmListForServicesData() == null) {
                 Utility.getInstance().setmListForServicesData(list);
+            }
+        }  else if(loader.getId() == 3) {
+            ArrayList<ContactUsListItem> list = new ArrayList<>();
+            if (data.getCount() != 0) {
+                while (data.moveToNext()) {
+                    String desc = data.getString(data.getColumnIndexOrThrow(QuotesProvider.ContactsUsTable.DESC));
+                    String categoryName = data.getString(data.getColumnIndexOrThrow(QuotesProvider.ContactsUsTable.CATEGORY));
+                    String categoryId = data.getString(data.getColumnIndexOrThrow(QuotesProvider.ContactsUsTable.CATEGORY_ID));
+
+                    String headerValue =  data.getString(data.getColumnIndexOrThrow(QuotesProvider.ContactsUsTable.ISHEADER));
+
+                    ContactUsListItem qt = new ContactUsListItem();
+                    qt.setDescription(desc);
+                    qt.setCategory(categoryName);
+                    qt.setCategoryId(categoryId);
+                    qt.setHeader(headerValue);
+                    list.add(qt);
+                }
+            }
+            if (Utility.getInstance().getmListForContactUsData() == null) {
+                Utility.getInstance().setmListForContactUsData(list);
             }
         }
     }
@@ -449,13 +480,24 @@ public class CrkMainActivity extends AppCompatActivity implements LoaderManager.
             b.putString("selection", null);
             b.putStringArray("selectionArgs", null);
             b.putString("sortOrder", null);
-        }else if(queryNo == 2) {
+        } else if(queryNo == 2) {
             b.putStringArray("projection", new String[]{
                     QuotesProvider.ServicesTable._ID,
                     QuotesProvider.ServicesTable.DESC,
                     QuotesProvider.ServicesTable.CATEGORY,
                     QuotesProvider.ServicesTable.ISHEADER,
                     QuotesProvider.ServicesTable.CATEGORY_ID
+            });
+            b.putString("selection", null);
+            b.putStringArray("selectionArgs", null);
+            b.putString("sortOrder", null);
+        } else if(queryNo == 3) {
+            b.putStringArray("projection", new String[]{
+                    QuotesProvider.ContactsUsTable._ID,
+                    QuotesProvider.ContactsUsTable.DESC,
+                    QuotesProvider.ContactsUsTable.CATEGORY,
+                    QuotesProvider.ContactsUsTable.ISHEADER,
+                    QuotesProvider.ContactsUsTable.CATEGORY_ID
             });
             b.putString("selection", null);
             b.putStringArray("selectionArgs", null);
@@ -893,6 +935,128 @@ public class CrkMainActivity extends AppCompatActivity implements LoaderManager.
             values.put(QuotesProvider.ServicesTable.ISHEADER, ""+obj.isHeader());
             values.put(QuotesProvider.ServicesTable.CATEGORY_ID, obj.getCategoryId());
             Uri uri = getContentResolver().insert(QuotesProvider.ServicesTable.CONTENT_URI,
+                    values);
+        }
+
+
+    }
+
+    public void addDummyDataToDBForContactUs() {
+
+        ArrayList<ServicesListItem> arrayList1 = new ArrayList<>();
+        ServicesListItem qt = new ServicesListItem();
+        qt.setDescription("Head Office - Hyderabad");
+        qt.setCategory("Main");
+        qt.setCategoryId("0");
+        qt.setHeader("true");
+        arrayList1.add(qt);
+        qt = new ServicesListItem();
+        qt.setDescription("CRK & ASSOCIATES");
+        qt.setCategory("Head Office - Hyderabad");
+        qt.setCategoryId("1");
+        arrayList1.add(qt);
+        qt = new ServicesListItem();
+        qt.setDescription("Chartered Accountants");
+        qt.setCategory("Head Office - Hyderabad");
+        qt.setCategoryId("1");
+        arrayList1.add(qt);
+        qt = new ServicesListItem();
+        qt.setDescription("Plot No 3A, Navodaya Colony,");
+        qt.setCategory("Head Office - Hyderabad");
+        qt.setCategoryId("1");
+        arrayList1.add(qt);
+        qt = new ServicesListItem();
+        qt.setDescription("Road No 14, Banjara Hills,");
+        qt.setCategory("Head Office - Hyderabad");
+        qt.setCategoryId("1");
+        arrayList1.add(qt);
+        qt = new ServicesListItem();
+        qt.setDescription("Hyderabad-500034");
+        qt.setCategory("Head Office - Hyderabad");
+        qt.setCategoryId("1");
+        arrayList1.add(qt);
+        qt = new ServicesListItem();
+        qt.setDescription("Andhra Pradesh, India");
+        qt.setCategory("Head Office - Hyderabad");
+        qt.setCategoryId("1");
+        arrayList1.add(qt);
+        qt = new ServicesListItem();
+        qt.setDescription("Phone no=+91-40-23552305");
+        qt.setCategory("Head Office - Hyderabad");
+        qt.setCategoryId("1");
+        arrayList1.add(qt);
+        qt = new ServicesListItem();
+        qt.setDescription("Fax=+91-40-23552304");
+        qt.setCategory("Head Office - Hyderabad");
+        qt.setCategoryId("1");
+        arrayList1.add(qt);
+        qt = new ServicesListItem();
+        qt.setDescription("Email=info@crkandassociates.com");
+        qt.setCategory("Head Office - Hyderabad");
+        qt.setCategoryId("1");
+        arrayList1.add(qt);
+
+
+
+
+
+
+
+        qt = new ServicesListItem();
+        qt.setDescription("Branch - Bangalore");
+        qt.setCategory("Main");
+        qt.setCategoryId("0");
+        qt.setHeader("true");
+        arrayList1.add(qt);
+        qt = new ServicesListItem();
+        qt.setDescription("CRK & ASSOCIATES");
+        qt.setCategory("Branch - Bangalore");
+        qt.setCategoryId("2");
+        arrayList1.add(qt);
+        qt = new ServicesListItem();
+        qt.setDescription("Chartered Accountants");
+        qt.setCategory("Branch - Bangalore");
+        qt.setCategoryId("2");
+        arrayList1.add(qt);
+        qt = new ServicesListItem();
+        qt.setDescription("No.157, New No.2,");
+        qt.setCategory("Branch - Bangalore");
+        qt.setCategoryId("2");
+        arrayList1.add(qt);
+        qt = new ServicesListItem();
+        qt.setDescription("21st Cross, Kaggadasapura");
+        qt.setCategory("Branch - Bangalore");
+        qt.setCategoryId("2");
+        arrayList1.add(qt);
+        qt = new ServicesListItem();
+        qt.setDescription("C V Raman Nagar,");
+        qt.setCategory("Branch - Bangalore");
+        qt.setCategoryId("2");
+        arrayList1.add(qt);
+        qt = new ServicesListItem();
+        qt.setDescription("Bangalore - 560093");
+        qt.setCategory("Branch - Bangalore");
+        qt.setCategoryId("2");
+        arrayList1.add(qt);
+        qt = new ServicesListItem();
+        qt.setDescription("Karnataka, India");
+        qt.setCategory("Branch - Bangalore");
+        qt.setCategoryId("2");
+        arrayList1.add(qt);
+        qt = new ServicesListItem();
+        qt.setDescription("Email=info@crkandassociates.com");
+        qt.setCategory("Branch - Bangalore");
+        qt.setCategoryId("2");
+        arrayList1.add(qt);
+
+
+        for (ServicesListItem obj : arrayList1) {
+            ContentValues values = new ContentValues();
+            values.put(QuotesProvider.ServicesTable.DESC, obj.getDescription());
+            values.put(QuotesProvider.ServicesTable.CATEGORY, obj.getCategory());
+            values.put(QuotesProvider.ServicesTable.ISHEADER, ""+obj.isHeader());
+            values.put(QuotesProvider.ServicesTable.CATEGORY_ID, obj.getCategoryId());
+            Uri uri = getContentResolver().insert(QuotesProvider.ContactsUsTable.CONTENT_URI,
                     values);
         }
 

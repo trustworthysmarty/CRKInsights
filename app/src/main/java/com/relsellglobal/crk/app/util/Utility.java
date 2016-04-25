@@ -6,6 +6,7 @@ import android.content.SharedPreferences;
 import android.widget.Toast;
 
 
+import com.relsellglobal.crk.app.pojo.ContactUsListItem;
 import com.relsellglobal.crk.app.pojo.QuotesListItem;
 import com.relsellglobal.crk.app.pojo.ServicesListItem;
 
@@ -28,6 +29,16 @@ public class Utility extends Application {
 
     private ArrayList<ServicesListItem> mListForServicesData;
 
+    private ArrayList<ContactUsListItem> mListForContactUsData;
+
+
+    public ArrayList<ContactUsListItem> getmListForContactUsData() {
+        return mListForContactUsData;
+    }
+
+    public void setmListForContactUsData(ArrayList<ContactUsListItem> mListForContactUsData) {
+        this.mListForContactUsData = mListForContactUsData;
+    }
 
     public ArrayList<ServicesListItem> getmListForServicesData() {
         return mListForServicesData;
