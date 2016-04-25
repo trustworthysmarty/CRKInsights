@@ -28,6 +28,7 @@ import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.HorizontalScrollView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.relsellglobal.crk.app.R;
@@ -165,7 +166,7 @@ public class SlidingTabLayout extends HorizontalScrollView {
 
         mViewPager = viewPager;
         if (viewPager != null) {
-            viewPager.setOnPageChangeListener(new InternalViewPagerListener());
+            viewPager.addOnPageChangeListener(new InternalViewPagerListener());
             populateTabStrip();
         }
     }
@@ -259,7 +260,7 @@ public class SlidingTabLayout extends HorizontalScrollView {
 
             removeOldSelection();
             ((TextView)selectedChild.findViewById(R.id.textView1)).setTextColor(Color.WHITE);
-            selectedChild.setPressed(true);
+            ((LinearLayout)selectedChild.findViewById(R.id.ll)).setBackground(getContext().getResources().getDrawable(R.drawable.bg_tabs_focus));
             oldSelection = selectedChild;
 
 
@@ -269,7 +270,7 @@ public class SlidingTabLayout extends HorizontalScrollView {
 
     private void removeOldSelection() {
         if(oldSelection != null) {
-            oldSelection.setPressed(false);
+            ((LinearLayout)oldSelection.findViewById(R.id.ll)).setBackground(getContext().getResources().getDrawable(R.drawable.bg_tabs));
             ((TextView)oldSelection.findViewById(R.id.textView1)).setTextColor(Color.WHITE);
         }
     }
