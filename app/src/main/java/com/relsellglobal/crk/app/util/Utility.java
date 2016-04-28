@@ -3,13 +3,21 @@ package com.relsellglobal.crk.app.util;
 import android.app.Application;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.os.Environment;
 import android.widget.Toast;
 
 
+import com.relsellglobal.crk.app.CrkMainActivity;
+import com.relsellglobal.crk.app.contentproviders.QuotesProvider;
 import com.relsellglobal.crk.app.pojo.ContactUsListItem;
 import com.relsellglobal.crk.app.pojo.QuotesListItem;
 import com.relsellglobal.crk.app.pojo.ServicesListItem;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.nio.channels.FileChannel;
 import java.util.ArrayList;
 
 /**
@@ -31,6 +39,16 @@ public class Utility extends Application {
 
     private ArrayList<ContactUsListItem> mListForContactUsData;
 
+    public boolean isDebug() {
+        return debug;
+    }
+
+    public void setDebug(boolean debug) {
+        this.debug = debug;
+    }
+
+    boolean debug = true;
+
 
     public ArrayList<ContactUsListItem> getmListForContactUsData() {
         return mListForContactUsData;
@@ -44,7 +62,7 @@ public class Utility extends Application {
         return mListForServicesData;
     }
 
-    public void setmListForServicesData(ArrayList<ServicesListItem> mListForServicesData) {
+    public synchronized void  setmListForServicesData(ArrayList<ServicesListItem> mListForServicesData) {
         this.mListForServicesData = mListForServicesData;
     }
 
@@ -111,5 +129,79 @@ public class Utility extends Application {
         SharedPreferences prefs = getSharedPreferences(fileName, MODE_PRIVATE);
         value = prefs.getLong(key, -1);
         return value;
+    }
+
+    public String getServer() {
+
+        String key = "server_address";
+        String value = getDataFromPefs(CrkMainActivity.mDbPerfsFileName, key);
+        if(value != null && !value.equalsIgnoreCase("")){
+            return value;
+        }
+        return "relsellglobal.in";
+    }
+
+    public String constructUrl() {
+        String result="";
+        String key = "server_address";
+        String value = getDataFromPefs(CrkMainActivity.mDbPerfsFileName, key);
+        if(value != null && !value.equalsIgnoreCase("")){
+            String key1 = "folderName";
+            String value1 = getDataFromPefs(CrkMainActivity.mDbPerfsFileName, key1);
+            if(value1 != null && !value1.equalsIgnoreCase("")){
+                result = value.trim();
+                int firstSlashIndex = result.indexOf("/");
+                String tempResult = result.substring(0, firstSlashIndex);
+                String tempRemaining = result.substring(firstSlashIndex+1);
+                tempResult += ":" + getPort().trim()+"/" + tempRemaining+ "/"+value1.trim();
+                result = tempResult;
+            }else {
+                result = value.trim();
+                int firstSlashIndex = result.indexOf("/");
+                String tempResult = result.substring(0, firstSlashIndex);
+                String tempRemaining = result.substring(firstSlashIndex+1);
+                tempResult += ":" + getPort().trim()+"/" + tempRemaining;
+                result = tempResult;
+
+            }
+        } else {
+            result = getServer() + ":" + getPort();
+        }
+        return result;
+    }
+
+
+
+    public String getPort() {
+
+       /* if (isLocal) {
+            return "80";
+        }*/
+        String key = "server_port";
+        String value = getDataFromPefs(CrkMainActivity.mDbPerfsFileName, key);
+        if(value != null && !value.equalsIgnoreCase("")){
+            return value;
+        }
+        return  "80";
+    }
+    public void exportDB(){
+        File sd = Environment.getExternalStorageDirectory();
+        File data = Environment.getDataDirectory();
+        FileChannel source=null;
+        FileChannel destination=null;
+        String currentDBPath = "/data/"+ getApplicationContext().getPackageName() +"/databases/"+ QuotesProvider.DATABASE_NAME;
+        String backupDBPath = QuotesProvider.DATABASE_NAME;
+        File currentDB = new File(data, currentDBPath);
+        File backupDB = new File(sd, backupDBPath);
+        try {
+            source = new FileInputStream(currentDB).getChannel();
+            destination = new FileOutputStream(backupDB).getChannel();
+            destination.transferFrom(source, 0, source.size());
+            source.close();
+            destination.close();
+            Toast.makeText(this, "DB Exported!", Toast.LENGTH_LONG).show();
+        } catch(IOException e) {
+            e.printStackTrace();
+        }
     }
 }

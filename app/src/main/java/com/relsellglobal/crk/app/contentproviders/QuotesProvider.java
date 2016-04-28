@@ -54,14 +54,26 @@ public class QuotesProvider extends ContentProvider {
         public static final String ISHEADER="isheader";
     }
 
+    public static class MetaDataTable {
+        public static final String URL = "content://" + PROVIDER_NAME + "/metadatatable";
+        public static final Uri CONTENT_URI = Uri.parse(URL);
+        public static final String _ID = "_id";
+        public static final String NAME = "name";
+        public static final String CREATE_TIME = "Create_time";
+        public static final String UPDATE_TIME = "Update_time";
+    }
+
 
     private static HashMap<String, String> QUOTES_PROJECTION_MAP;
     private static HashMap<String, String> SERVICES_PROJECTION_MAP;
     private static HashMap<String, String> CONTACTUS_PROJECTION_MAP;
+    private static HashMap<String, String> METADATA_PROJECTION_MAP;
 
     static final int QUOTE = 1;
     static final int SERVICES = 2;
     static final int CONTACTUS = 3;
+    static final int METADATA = 4;
+
 
     static final UriMatcher uriMatcher;
 
@@ -70,17 +82,27 @@ public class QuotesProvider extends ContentProvider {
         uriMatcher.addURI(PROVIDER_NAME, "quotestable", QUOTE);
         uriMatcher.addURI(PROVIDER_NAME, "servicestable", SERVICES);
         uriMatcher.addURI(PROVIDER_NAME, "contactustable", CONTACTUS);
+        uriMatcher.addURI(PROVIDER_NAME, "metadatatable", METADATA);
     }
 
     /**
      * Database specific constant declarations
      */
     private SQLiteDatabase db;
-    static final String DATABASE_NAME = "QuotesDb";
+    public static final String DATABASE_NAME = "QuotesDb";
     public static final String QUOTES_TABLE_NAME = "quotestable";
     public static final String SERVICES_TABLE_NAME = "servicestable";
     public static final String CONTACTUS_TABLE_NAME = "contactustable";
+    public static final String METADATA_TABLE_NAME = "metadatatable";
     static final int DATABASE_VERSION = 6;
+
+
+    static final String CREATE_META_DATA_DB_TABLE =
+            " CREATE TABLE " + METADATA_TABLE_NAME +
+                    " (" + MetaDataTable._ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                    MetaDataTable.NAME + " TEXT NOT NULL, " +
+                    MetaDataTable.CREATE_TIME + " TEXT, " +
+                    MetaDataTable.UPDATE_TIME + "  TEXT NOT NULL);";
 
     static final String CREATE_QUOTE_DB_TABLE =
             " CREATE TABLE " + QUOTES_TABLE_NAME +
@@ -121,6 +143,7 @@ public class QuotesProvider extends ContentProvider {
             db.execSQL(CREATE_QUOTE_DB_TABLE);
             db.execSQL(CREATE_SERVICES_DB_TABLE);
             db.execSQL(CREATE_CONTACTUS_DB_TABLE);
+            db.execSQL(CREATE_META_DATA_DB_TABLE);
         }
 
         @Override
@@ -129,6 +152,7 @@ public class QuotesProvider extends ContentProvider {
             db.execSQL("DROP TABLE IF EXISTS " + QUOTES_TABLE_NAME);
             db.execSQL("DROP TABLE IF EXISTS " + SERVICES_TABLE_NAME);
             db.execSQL("DROP TABLE IF EXISTS " + CONTACTUS_TABLE_NAME);
+            db.execSQL("DROP TABLE IF EXISTS " + METADATA_TABLE_NAME);
             onCreate(db);
         }
     }
@@ -192,6 +216,16 @@ public class QuotesProvider extends ContentProvider {
                }
                return _uri;
            }
+       } else if(tableName.equalsIgnoreCase(METADATA_TABLE_NAME)) {
+           long rowID = db.insert(tableName, "", values);
+           if (rowID > 0) {
+               Uri _uri = ContentUris.withAppendedId(MetaDataTable.CONTENT_URI, rowID);
+               ContentResolver cr = getContext().getContentResolver();
+               if(cr != null) {
+                   cr.notifyChange(_uri, null);
+               }
+               return _uri;
+           }
        }
         return null;
     }
@@ -215,6 +249,10 @@ public class QuotesProvider extends ContentProvider {
             case CONTACTUS:
                 qb.setTables(CONTACTUS_TABLE_NAME);
                 qb.setProjectionMap(CONTACTUS_PROJECTION_MAP);
+                break;
+            case METADATA:
+                qb.setTables(METADATA_TABLE_NAME);
+                qb.setProjectionMap(METADATA_PROJECTION_MAP);
                 break;
             default:
                 throw new IllegalArgumentException("Unknown URI While query" + uri);
@@ -249,6 +287,9 @@ public class QuotesProvider extends ContentProvider {
             case CONTACTUS:
                 count = db.delete(CONTACTUS_TABLE_NAME, selection, selectionArgs);
                 break;
+            case METADATA:
+                count = db.delete(METADATA_TABLE_NAME, selection, selectionArgs);
+                break;
             default:
                 throw new IllegalArgumentException("Unknown URI " + uri);
         }
@@ -273,6 +314,9 @@ public class QuotesProvider extends ContentProvider {
                 break;
             case CONTACTUS:
                 count = db.update(CONTACTUS_TABLE_NAME, values,
+                        selection, selectionArgs);
+            case METADATA:
+                count = db.update(METADATA_TABLE_NAME, values,
                         selection, selectionArgs);
                 break;
             default:
@@ -299,6 +343,9 @@ public class QuotesProvider extends ContentProvider {
                 break;
             case CONTACTUS:
                 result = CONTACTUS_TABLE_NAME;
+                break;
+            case METADATA:
+                result = METADATA_TABLE_NAME;
                 break;
             default:
                 throw new IllegalArgumentException("Unsupported URI Name in table: " + uri);

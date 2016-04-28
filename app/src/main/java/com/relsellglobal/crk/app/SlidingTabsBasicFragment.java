@@ -105,7 +105,7 @@ public class SlidingTabsBasicFragment extends Fragment {
          */
         @Override
         public int getCount() {
-            return 5;
+            return titleList != null ? titleList.size() : 0;
         }
 
         /**
