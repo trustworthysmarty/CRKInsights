@@ -13,6 +13,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.text.Html;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -57,8 +58,9 @@ public class ServicesActivity extends AppCompatActivity implements LoaderManager
 
         toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+        getSupportActionBar().setHomeAsUpIndicator(getResources().getDrawable(R.mipmap.modified_arrow));
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        getSupportActionBar().setTitle("Services");
+        getSupportActionBar().setTitle(getString(R.string.services_txt));
 
 
 
@@ -71,6 +73,7 @@ public class ServicesActivity extends AppCompatActivity implements LoaderManager
         getSupportFragmentManager().beginTransaction().replace(mFrameLayout.getId(), fragment, "simple_fragment").commit();
 
         mCollapsingToobar.setExpandedTitleColor(Color.TRANSPARENT);
+        mCollapsingToobar.setCollapsedTitleTextColor(Color.BLACK);
 
 
 

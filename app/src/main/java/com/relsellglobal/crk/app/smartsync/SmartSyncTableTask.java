@@ -9,6 +9,7 @@ import android.util.Log;
 import android.widget.Toast;
 
 import com.relsellglobal.crk.app.contentproviders.QuotesProvider;
+import com.relsellglobal.crk.app.pojo.ContactUsListItem;
 import com.relsellglobal.crk.app.pojo.ServicesListItem;
 import com.relsellglobal.crk.app.pojo.TableMetaDataItem;
 import com.relsellglobal.crk.app.util.Utility;
@@ -278,7 +279,58 @@ public class SmartSyncTableTask extends AsyncTask<Void, Integer, Boolean> {
 
                     }
 
-                } else if (syncTableVar == 3) {
+                } else if (syncTableVar == 2) {
+
+
+                    JSONObject jsonObj;
+
+
+                    mContext.getContentResolver().delete(QuotesProvider.ContactsUsTable.CONTENT_URI,null,null);
+
+
+
+                    try {
+
+                        jsonObj = new JSONObject(responseString.toString());
+                        JSONObject listObj = jsonObj.getJSONObject("list");
+                        JSONArray dataArray = listObj.getJSONArray("data");
+
+                        ArrayList<ContactUsListItem> arrayList = new ArrayList<>();
+
+                        for (int i = 0; i < dataArray.length(); i++) {
+
+                            JSONObject obj = dataArray.getJSONObject(i);
+
+                            String serviceID = obj.getString("ID");
+                            String description = obj.getString("DESCRIPTION");
+                            String categoryid = obj.getString("CATEGORYID");
+                            String categoryName = obj.getString("CATEGORYNAME");
+
+                            ContactUsListItem contactUsListItem = new ContactUsListItem();
+                            contactUsListItem.setId(serviceID);
+                            contactUsListItem.setDescription(description);
+                            contactUsListItem.setCategoryId(categoryid);
+                            contactUsListItem.setCategory(categoryName);
+                            if (categoryid.equalsIgnoreCase("0")) {
+                                contactUsListItem.setHeader("true");
+                            }
+                            arrayList.add(contactUsListItem);
+                        }
+
+                        for (ContactUsListItem obj : arrayList) {
+                            ContentValues values = new ContentValues();
+                            values.put(QuotesProvider.ServicesTable.DESC, obj.getDescription());
+                            values.put(QuotesProvider.ServicesTable.CATEGORY, obj.getCategory());
+                            values.put(QuotesProvider.ServicesTable.ISHEADER, "" + obj.isHeader());
+                            values.put(QuotesProvider.ServicesTable.CATEGORY_ID, obj.getCategoryId());
+                            Uri uri = mContext.getContentResolver().insert(QuotesProvider.ContactsUsTable.CONTENT_URI,
+                                    values);
+                        }
+
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+
+                    }
 
                 } else if (syncTableVar == 4) {
 
@@ -339,7 +391,9 @@ public class SmartSyncTableTask extends AsyncTask<Void, Integer, Boolean> {
             result = "controlVar=19";
         } else if (syncDataVariable == 1) {
             result = "controlVar=18";
-        } else {
+        }  else if (syncDataVariable == 2) {
+            result = "controlVar=20";
+        }else {
 
             Set<String> keys = incomingHm.keySet();
             HashMap<String, String> map = new HashMap<String, String>();

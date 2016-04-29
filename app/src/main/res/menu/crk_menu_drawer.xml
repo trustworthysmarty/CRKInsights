@@ -5,7 +5,7 @@
             <item
                 android:id="@+id/homescreen"
                 android:checked="true"
-                android:icon="@mipmap/menu"
+                android:icon="@mipmap/menu_two"
                 android:title="@string/crk_menu_home" />
           <item
               android:id="@+id/homescreen_pub"

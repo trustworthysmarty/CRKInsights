@@ -113,6 +113,7 @@ public class CrkMainActivity extends AppCompatActivity implements LoaderManager.
         mContentFrameLayoutTwo = (ViewPager) findViewById(R.id.viewpager);
         mAppBarLayout = (AppBarLayout) findViewById(R.id.app_bar_layout);
         toolbar.setTitle("");
+        mNavigationView = (NavigationView)findViewById(R.id.navigation_view);
 
 
 
@@ -136,7 +137,7 @@ public class CrkMainActivity extends AppCompatActivity implements LoaderManager.
 
 
 
-      /*  mNavigationView.setItemBackground(this.getResources().getDrawable(R.drawable.bg_menu_item_selector));
+       mNavigationView.setItemBackground(this.getResources().getDrawable(R.drawable.bg_menu_item_selector));
 
 
         mNavigationView.setItemTextColor(new ColorStateList(
@@ -151,7 +152,7 @@ public class CrkMainActivity extends AppCompatActivity implements LoaderManager.
                         Color.rgb(0, 0, 0)
                 }
         ));
-*/
+
 
 
 
@@ -254,7 +255,7 @@ public class CrkMainActivity extends AppCompatActivity implements LoaderManager.
             /// call db method
             getDataFromDB(1);
             getDataFromDB(2);    // services table
-            getDataFromDB(3);
+            getDataFromDB(3);    // contact us table
 
 
      //   }

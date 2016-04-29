@@ -77,7 +77,6 @@
         android:layout_gravity="start"
         android:background="#FFFFFF"
         app:headerLayout="@layout/header_layout"
-        app:itemIconTint="@color/drawer_menu_item_color"
         app:menu="@menu/crk_menu_drawer"/>
 
 </android.support.v4.widget.DrawerLayout>

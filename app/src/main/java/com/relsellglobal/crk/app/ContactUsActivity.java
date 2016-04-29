@@ -1,8 +1,13 @@
 package com.relsellglobal.crk.app;
 
+import android.app.LoaderManager;
 import android.content.Context;
+import android.content.CursorLoader;
+import android.content.Loader;
+import android.database.Cursor;
 import android.graphics.Color;
 import android.graphics.Typeface;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.CollapsingToolbarLayout;
@@ -24,6 +29,7 @@ import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
 
+import com.relsellglobal.crk.app.contentproviders.QuotesProvider;
 import com.relsellglobal.crk.app.pojo.ContactUsListItem;
 import com.relsellglobal.crk.app.pojo.ServicesListItem;
 import com.relsellglobal.crk.app.util.Utility;
@@ -35,7 +41,7 @@ import java.util.ArrayList;
 /**
  * Created by anilkukreti on 29/02/16.
  */
-public class ContactUsActivity extends AppCompatActivity {
+public class ContactUsActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<Cursor>  {
 
     private Toolbar toolbar;
     RecyclerView mRecyclerView;
@@ -57,14 +63,22 @@ public class ContactUsActivity extends AppCompatActivity {
 
         toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+        getSupportActionBar().setHomeAsUpIndicator(getResources().getDrawable(R.mipmap.modified_arrow));
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        getSupportActionBar().setTitle("Contact us");
+        getSupportActionBar().setTitle(getString(R.string.contactus_txt));
+
+
+
+
         SimpleFlipperFragment fragment = new SimpleFlipperFragment();
 
         getSupportFragmentManager().beginTransaction().replace(mFrameLayout.getId(), fragment, "simple_fragment").commit();
 
         mCollapsingToobar.setExpandedTitleColor(Color.TRANSPARENT);
-        inflateUI();
+        mCollapsingToobar.setCollapsedTitleTextColor(Color.BLACK);
+        getDataFromDB(3);    // contactus table
+
+
 
 
 
@@ -157,6 +171,72 @@ public class ContactUsActivity extends AppCompatActivity {
         density = dm.density;
 
         return density;
+
+    }
+
+    public void getDataFromDB(int queryNo) {
+        Bundle b = new Bundle();
+        if (queryNo == 2) {
+            b.putStringArray("projection", new String[]{
+                    QuotesProvider.ServicesTable._ID,
+                    QuotesProvider.ServicesTable.DESC,
+                    QuotesProvider.ServicesTable.CATEGORY,
+                    QuotesProvider.ServicesTable.ISHEADER,
+                    QuotesProvider.ServicesTable.CATEGORY_ID
+            });
+            b.putString("selection", null);
+            b.putStringArray("selectionArgs", null);
+            b.putString("sortOrder", null);
+        }
+        Loader local = getLoaderManager().initLoader(queryNo, b, this);
+    }
+
+
+
+    @Override
+    public Loader<Cursor> onCreateLoader(int id, Bundle args) {
+        Uri CONTENT_URI = null;
+        String[] projection = args.getStringArray("projection");
+        String selection = args.getString("selection");
+        String[] selectionArgs = args.getStringArray("selectionArgs");
+        String sortOrder = args.getString("sortOrder");
+        if (id == 3) {
+            CONTENT_URI = QuotesProvider.ContactsUsTable.CONTENT_URI;
+        }
+
+        return new CursorLoader(this, CONTENT_URI, projection, selection, selectionArgs, sortOrder);
+    }
+
+    @Override
+    public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
+
+        if (loader.getId() == 3) {
+            ArrayList<ContactUsListItem> list = new ArrayList<>();
+            if (data.getCount() != 0) {
+                while (data.moveToNext()) {
+                    String desc = data.getString(data.getColumnIndexOrThrow(QuotesProvider.ContactsUsTable.DESC));
+                    String categoryName = data.getString(data.getColumnIndexOrThrow(QuotesProvider.ContactsUsTable.CATEGORY));
+                    String categoryId = data.getString(data.getColumnIndexOrThrow(QuotesProvider.ContactsUsTable.CATEGORY_ID));
+
+                    String headerValue = data.getString(data.getColumnIndexOrThrow(QuotesProvider.ContactsUsTable.ISHEADER));
+
+                    ContactUsListItem qt = new ContactUsListItem();
+                    qt.setDescription(desc);
+                    qt.setCategory(categoryName);
+                    qt.setCategoryId(categoryId);
+                    qt.setHeader(headerValue);
+                    list.add(qt);
+                }
+            }
+            //if (Utility.getInstance().getmListForServicesData() == null) {
+            Utility.getInstance().setmListForContactUsData(list);
+            //}
+            inflateUI();
+        }
+    }
+
+    @Override
+    public void onLoaderReset(Loader<Cursor> loader) {
 
     }
 
