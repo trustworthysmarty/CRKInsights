@@ -11,6 +11,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 
+import com.relsellglobal.crk.app.pojo.DrawerRowItem;
 import com.relsellglobal.crk.app.pojo.QuotesListItem;
 
 import java.util.ArrayList;
@@ -23,7 +24,7 @@ import java.util.List;
 public class CrkInsightTabListItemsCardAdapter extends RecyclerView.Adapter<CrkInsightTabListItemsCardAdapter.ViewHolder> {
 
     private Context mContext;
-    List<QuotesListItem> list = new ArrayList<>();
+    List<DrawerRowItem> list = new ArrayList<>();
     FragmentManager fragmentManager;
     int containerLayoutId;
     Typeface tf ;
@@ -31,7 +32,7 @@ public class CrkInsightTabListItemsCardAdapter extends RecyclerView.Adapter<CrkI
     public static final int CHILD = 2;
 
 
-    public CrkInsightTabListItemsCardAdapter(Context mContext, List<QuotesListItem> list, FragmentManager fm, int containerLayoutId) {
+    public CrkInsightTabListItemsCardAdapter(Context mContext, List<DrawerRowItem> list, FragmentManager fm, int containerLayoutId) {
         this.mContext = mContext;
         this.list = list;
         this.fragmentManager = fm;
@@ -67,9 +68,9 @@ public class CrkInsightTabListItemsCardAdapter extends RecyclerView.Adapter<CrkI
         switch (viewType) {
             case CHILD:
 
-                final QuotesListItem localObj = list.get(position);
+                final DrawerRowItem localObj = list.get(position);
 
-                holder.cardtitle.setText(localObj.getDescription());
+                holder.cardtitle.setText(localObj.getmTitle());
 
 
                 holder.downloadButtonLayout.setOnClickListener(new View.OnClickListener() {
@@ -96,7 +97,7 @@ public class CrkInsightTabListItemsCardAdapter extends RecyclerView.Adapter<CrkI
         return list.size();
     }
 
-    public QuotesListItem getItem(int i) {
+    public DrawerRowItem getItem(int i) {
         return list.get(i);
     }
 

@@ -25,6 +25,9 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
+import android.widget.ProgressBar;
 
 import com.relsellglobal.crk.app.common.view.SlidingTabLayout;
 import com.relsellglobal.crk.app.pojo.QuotesListItem;
@@ -56,7 +59,8 @@ public class SlidingTabsBasicFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
             Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.fragment_sample, container, false);
+        View v = inflater.inflate(R.layout.fragment_sample, container, false);
+        return v;
     }
 
 
@@ -76,28 +80,16 @@ public class SlidingTabsBasicFragment extends Fragment {
      */
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
-        // BEGIN_INCLUDE (setup_viewpager)
-        // Get the ViewPager and set it's PagerAdapter so that it can display items
+
         mViewPager = (ViewPager) view.findViewById(R.id.viewpager);
         mViewPager.setAdapter(new SamplePagerAdapter());
-        // END_INCLUDE (setup_viewpager)
 
-        // BEGIN_INCLUDE (setup_slidingtablayout)
-        // Give the SlidingTabLayout the ViewPager, this must be done AFTER the ViewPager has had
-        // it's PagerAdapter set.
         mSlidingTabLayout = (SlidingTabLayout) view.findViewById(R.id.sliding_tabs);
         mSlidingTabLayout.setCustomTabView(R.layout.custom_sub_tab_layout,R.id.textView1);
         mSlidingTabLayout.setViewPager(mViewPager);
-        // END_INCLUDE (setup_slidingtablayout)
-    }
-    // END_INCLUDE (fragment_onviewcreated)
 
-    /**
-     * The {@link android.support.v4.view.PagerAdapter} used to display pages in this sample.
-     * The individual pages are simple and just display two lines of text. The important section of
-     * this class is the {@link #getPageTitle(int)} method which controls what is displayed in the
-     * {@link SlidingTabLayout}.
-     */
+    }
+
     class SamplePagerAdapter extends PagerAdapter {
 
         /**
@@ -145,7 +137,9 @@ public class SlidingTabsBasicFragment extends Fragment {
             View view = getActivity().getLayoutInflater().inflate(R.layout.pager_item,
                     container, false);
             // Add the newly created View to the ViewPager
+
             recyclerView = (RecyclerView)view.findViewById(R.id.recyclerView);
+            ProgressBar pb = (ProgressBar)view.findViewById(R.id.progressBar);
 
             categoryNo = 1;
 
@@ -165,8 +159,12 @@ public class SlidingTabsBasicFragment extends Fragment {
                 }
             }
             if(modifiedList != null) {
-                adapter = new CrkInsightTabListItemsCardAdapter(getActivity(), modifiedList, getActivity().getSupportFragmentManager(), categoryNo);
-                recyclerView.setAdapter(adapter);
+                pb.setVisibility(View.GONE);
+                Animation a = AnimationUtils.loadAnimation(getContext(),R.anim.slide_in_up);
+                recyclerView.setVisibility(View.VISIBLE);
+                recyclerView.startAnimation(a);
+                /*adapter = new CrkInsightTabListItemsCardAdapter(getActivity(), modifiedList, getActivity().getSupportFragmentManager(), categoryNo);*/
+                //recyclerView.setAdapter(adapter);
             }
 
 
@@ -189,7 +187,7 @@ public class SlidingTabsBasicFragment extends Fragment {
         @Override
         public void destroyItem(ViewGroup container, int position, Object object) {
             container.removeView((View) object);
-            //Log.i(LOG_TAG, "destroyItem() [position: " + position + "]");
+
         }
 
     }

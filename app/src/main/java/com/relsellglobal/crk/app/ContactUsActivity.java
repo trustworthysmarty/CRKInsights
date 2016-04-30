@@ -119,7 +119,8 @@ public class ContactUsActivity extends AppCompatActivity implements LoaderManage
                 ArrayList<String> childList = new ArrayList();
                 String categoryName = listItem.getDescription();
                 for (ContactUsListItem obj1 : modifiedList) {
-                    if (obj1.getCategory().equalsIgnoreCase(categoryName)) {
+
+                    if (obj1.getCategory().trim().equalsIgnoreCase(categoryName.trim())) {
                         childList.add(obj1.getDescription());
                     }
                 }

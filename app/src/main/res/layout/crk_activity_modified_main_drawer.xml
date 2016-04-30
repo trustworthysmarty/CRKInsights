@@ -71,13 +71,15 @@
 
     </android.support.design.widget.CoordinatorLayout>
 
-    <android.support.design.widget.NavigationView
-        android:id="@+id/navigation_view"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_gravity="start"
+
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/RecyclerView"
         android:background="#FFFFFF"
-        app:headerLayout="@layout/header_layout"
-        app:menu="@menu/crk_menu_drawer"/>
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:layout_gravity="left"
+        android:scrollbars="vertical">
+
+    </android.support.v7.widget.RecyclerView>
 
 </android.support.v4.widget.DrawerLayout>

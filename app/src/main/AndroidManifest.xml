@@ -15,7 +15,7 @@
         android:theme="@style/AppTheme">
         <activity android:name="com.relsellglobal.crk.app.ContactUsActivity" android:theme="@style/AppTheme.NoActionBar" android:screenOrientation="portrait"  />
         <activity android:name="com.relsellglobal.crk.app.ServicesActivity" android:theme="@style/AppTheme.NoActionBar" android:screenOrientation="portrait"  />
-        <activity android:name="com.relsellglobal.crk.app.CrkMainActivity" android:theme="@style/AppTheme.NoActionBar" android:screenOrientation="portrait" >
+        <activity android:name="com.relsellglobal.crk.app.CrkModifiedMainActivity" android:theme="@style/AppTheme.NoActionBar" android:screenOrientation="portrait" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -31,6 +31,18 @@
                        android:resource="@xml/search_bar"/>
         </activity>
         <provider android:name=".contentproviders.QuotesProvider" android:authorities="com.relsellglobal.crk.app.contentproviders.QuotesProvider" />
+
+        <receiver android:name=".CrkAlarmReceiver"></receiver>
+        <service android:name=".CrkClientServicerSyncService" />
+
+        <receiver android:name=".SampleBootReceiver"
+                  android:enabled="false">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED"></action>
+            </intent-filter>
+        </receiver>
+
+
     </application>
 
 </manifest>

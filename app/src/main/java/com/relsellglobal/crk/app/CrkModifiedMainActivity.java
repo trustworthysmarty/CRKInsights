@@ -20,31 +20,34 @@ import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
+import android.support.v4.view.GravityCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.GestureDetector;
 import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
-import android.widget.AutoCompleteTextView;
 import android.widget.FrameLayout;
 import android.widget.Toast;
 
 import com.relsellglobal.crk.app.contentproviders.QuotesProvider;
 import com.relsellglobal.crk.app.customcomponents.NonSwipableViewPager;
 import com.relsellglobal.crk.app.pojo.ContactUsListItem;
+import com.relsellglobal.crk.app.pojo.DrawerHeaderItem;
+import com.relsellglobal.crk.app.pojo.DrawerRowItem;
 import com.relsellglobal.crk.app.pojo.QuotesListItem;
 import com.relsellglobal.crk.app.pojo.ServicesListItem;
 import com.relsellglobal.crk.app.pojo.TableMetaDataItem;
 import com.relsellglobal.crk.app.smartsync.SmartSyncTableTask;
 import com.relsellglobal.crk.app.util.Utility;
-import com.relsellglobal.crk.app.viewflipperscroller.SimpleFlipperFragment;
-
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -64,7 +67,6 @@ import java.net.URLEncoder;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -75,7 +77,7 @@ import java.util.Set;
  * Created by anilkukreti on 09/04/16.
  */
 
-public class CrkMainActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<Cursor> {
+public class CrkModifiedMainActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<Cursor> {
 
     DrawerLayout Drawer;                                  // Declaring DrawerLayout
 
@@ -83,6 +85,13 @@ public class CrkMainActivity extends AppCompatActivity implements LoaderManager.
     AppBarLayout mAppBarLayout;
 
     NavigationView mNavigationView;
+
+    RecyclerView mRecyclerView;                           // Declaring RecyclerView
+    RecyclerView.Adapter mAdapter;                        // Declaring Adapter For Recycler View
+    RecyclerView.LayoutManager mLayoutManager;
+    ArrayList<DrawerHeaderItem> mDrawerHeaderItemList;
+    ArrayList<DrawerRowItem> mDrawerRowItemList;
+
 
     public static final int SERVICES_ACTIVITY_START_CODE = 9001;
     public static final int CONTACTUS_ACTIVITY_START_CODE = 9002;
@@ -107,17 +116,16 @@ public class CrkMainActivity extends AppCompatActivity implements LoaderManager.
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.crk_activity_main_drawer);
+        setContentView(R.layout.crk_activity_modified_main_drawer);
         toolbar = (Toolbar) findViewById(R.id.toolbar);
         floatingActionButton = (FloatingActionButton) findViewById(R.id.fab);
         mFrameLayout = (FrameLayout) findViewById(R.id.content_frame);
         mContentFrameLayoutTwo = (ViewPager) findViewById(R.id.viewpager);
         mAppBarLayout = (AppBarLayout) findViewById(R.id.app_bar_layout);
         toolbar.setTitle("");
-        mNavigationView = (NavigationView)findViewById(R.id.navigation_view);
+        mNavigationView = (NavigationView) findViewById(R.id.navigation_view);
 
         mAlarmReceiver = new CrkAlarmReceiver();
-
 
 
         SimpleFragment fragment = new SimpleFragment();
@@ -140,7 +148,9 @@ public class CrkMainActivity extends AppCompatActivity implements LoaderManager.
 
 
 
-       mNavigationView.setItemBackground(this.getResources().getDrawable(R.drawable.bg_menu_item_selector));
+
+
+      /* mNavigationView.setItemBackground(this.getResources().getDrawable(R.drawable.bg_menu_item_selector));
 
 
         mNavigationView.setItemTextColor(new ColorStateList(
@@ -156,10 +166,27 @@ public class CrkMainActivity extends AppCompatActivity implements LoaderManager.
                 }
         ));
 
+*/
 
 
+        addDummyDataListUIFrom();
+
+        mRecyclerView = (RecyclerView) findViewById(R.id.RecyclerView); // Assigning the RecyclerView Object to the xml View
+
+        mRecyclerView.setHasFixedSize(true);                            // Letting the system know that the list objects are of fixed size
 
 
+        mAdapter = new CrkNavigationAdapter(this, mDrawerHeaderItemList, mDrawerRowItemList);
+
+
+        //mRecyclerView.addItemDecoration(new TorrinsListCustomDividerForDrawer(this, R.drawable.listitem_divider));
+
+        mRecyclerView.setAdapter(mAdapter);                              // Setting the adapter to RecyclerView
+        //mRecyclerView.addItemDecoration(new ListCustomDivider(this, R.drawable.listitem_divider,false,false));
+
+        mLayoutManager = new LinearLayoutManager(this);                 // Creating a layout Manager
+
+        mRecyclerView.setLayoutManager(mLayoutManager);
 
 
         viewPager = (NonSwipableViewPager) findViewById(R.id.viewpager);
@@ -207,7 +234,9 @@ public class CrkMainActivity extends AppCompatActivity implements LoaderManager.
             }
         });
 
-        mNavigationView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
+
+
+      /*  mNavigationView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
             @Override
             public boolean onNavigationItemSelected(MenuItem item) {
                 int id = item.getItemId();
@@ -240,7 +269,7 @@ public class CrkMainActivity extends AppCompatActivity implements LoaderManager.
         });
 
 
-        mNavigationView.setCheckedItem(0);
+        mNavigationView.setCheckedItem(0);*/
 
 
         String dbcreatedValue = Utility.getInstance().getDataFromPefs(mDbPerfsFileName, "dbcreated");
@@ -255,13 +284,133 @@ public class CrkMainActivity extends AppCompatActivity implements LoaderManager.
 
         } //else {
 
-            /// call db method
-            getDataFromDB(1);
-            getDataFromDB(2);    // services table
-            getDataFromDB(3);    // contact us table
+        /// call db method
+        getDataFromDB(1);
+        getDataFromDB(2);    // services table
+        getDataFromDB(3);    // contact us table
 
 
-     //   }
+        //   }
+
+        final GestureDetector mGestureDetector = new GestureDetector(CrkModifiedMainActivity.this, new GestureDetector.SimpleOnGestureListener() {
+
+            @Override
+            public boolean onSingleTapUp(MotionEvent e) {
+                return true;
+            }
+
+        });
+
+
+        mRecyclerView.addOnItemTouchListener(new RecyclerView.OnItemTouchListener() {
+            @Override
+            public boolean onInterceptTouchEvent(RecyclerView recyclerView, MotionEvent motionEvent) {
+                View child = recyclerView.findChildViewUnder(motionEvent.getX(), motionEvent.getY());
+
+
+                if (child != null && mGestureDetector.onTouchEvent(motionEvent)) {
+                    int position = recyclerView.getChildLayoutPosition(child);
+                    for (int i = 0; i < mDrawerRowItemList.size(); i++) {
+                        DrawerRowItem obj = mDrawerRowItemList.get(i);
+                        if (i + 1 == position) {
+                            obj.setmActive(true);
+                        } else {
+                            obj.setmActive(false);
+                        }
+                    }
+
+
+                    mAdapter.notifyDataSetChanged();
+
+
+                    if (position == 1) {
+                        if (Drawer.isDrawerOpen(Gravity.LEFT)) {
+                            Drawer.closeDrawer(Gravity.LEFT);
+                        }
+                        viewPager.setCurrentItem(0);
+
+                    } else if (position == 2) {
+                        if (Drawer.isDrawerOpen(Gravity.LEFT)) {
+                            Drawer.closeDrawer(Gravity.LEFT);
+                        }
+
+                        viewPager.setCurrentItem(1);
+                    } else {
+                        Bundle b = new Bundle();
+                        b.putString("quoteText", "Anil");
+                        selectItem(position, b);
+                    }
+                    return true;
+
+                }
+
+                return false;
+            }
+
+
+            @Override
+            public void onTouchEvent(RecyclerView recyclerView, MotionEvent motionEvent) {
+
+            }
+
+            /**
+             * Called when a child of RecyclerView does not want RecyclerView and its ancestors to
+             * intercept touch events with
+             * { ViewGroup#onInterceptTouchEvent(MotionEvent)}.
+             *
+             * @param disallowIntercept True if the child does not want the parent to
+             *                          intercept touch events.
+             *                          ViewParent#requestDisallowInterceptTouchEvent(boolean)
+             */
+            @Override
+            public void onRequestDisallowInterceptTouchEvent(boolean disallowIntercept) {
+
+            }
+        });
+
+
+    }
+
+
+    public void addDummyDataListUIFrom() {
+        mDrawerHeaderItemList = new ArrayList<DrawerHeaderItem>();
+        mDrawerRowItemList = new ArrayList<DrawerRowItem>();
+        DrawerHeaderItem obj = new DrawerHeaderItem();
+        obj.setName("Relsell Global");
+        obj.setEmail("relsellglobal@gmail.com");
+        obj.setProfile(R.mipmap.steve_jobs);
+        mDrawerHeaderItemList.add(obj);
+
+
+        DrawerRowItem obj1 = new DrawerRowItem();
+        obj1.setmActive(true);
+        obj1.setmTitle("Insights");
+        obj1.setmSectionHeader(false);
+        obj1.setmIcon(R.mipmap.menu);
+        mDrawerRowItemList.add(obj1);
+
+        obj1 = new DrawerRowItem();
+        obj1.setmSectionHeader(false);
+        obj1.setmActive(false);
+        obj1.setmTitle("Publications");
+        obj1.setmIcon(R.mipmap.menu);
+        mDrawerRowItemList.add(obj1);
+
+
+        obj1 = new DrawerRowItem();
+        obj1.setmSectionHeader(false);
+        obj1.setmActive(false);
+        obj1.setmTitle("Services");
+        obj1.setmIcon(R.mipmap.menu);
+        mDrawerRowItemList.add(obj1);
+
+        obj1 = new DrawerRowItem();
+        obj1.setmSectionHeader(false);
+        obj1.setmActive(false);
+        obj1.setmTitle("Contact us");
+        obj1.setmIcon(R.mipmap.menu);
+        mDrawerRowItemList.add(obj1);
+
 
     }
 
@@ -286,14 +435,13 @@ public class CrkMainActivity extends AppCompatActivity implements LoaderManager.
             // lets start with services tab
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
-                new SmartSyncTableTask(null,2,CrkMainActivity.this).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+                new SmartSyncTableTask(null, 2, CrkModifiedMainActivity.this).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
             } else {
-                new SmartSyncTableTask(null,2,CrkMainActivity.this).execute();
+                new SmartSyncTableTask(null, 2, CrkModifiedMainActivity.this).execute();
             }
 
             return true;
         }
-
 
 
         return super.onOptionsItemSelected(item);
@@ -301,9 +449,9 @@ public class CrkMainActivity extends AppCompatActivity implements LoaderManager.
 
     public boolean onPrepareOptionsMenu(Menu menu) {
         MenuItem search = menu.findItem(R.id.search);
-        if(Utility.getInstance().isDebug()) {
+        if (Utility.getInstance().isDebug()) {
             search.setVisible(false);   // when needed i will check sync by making this true
-        }else {
+        } else {
             search.setVisible(false);
         }
         return true;
@@ -312,7 +460,16 @@ public class CrkMainActivity extends AppCompatActivity implements LoaderManager.
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        mNavigationView.setCheckedItem(R.id.homescreen);
+        for (int i = 0; i < mDrawerRowItemList.size(); i++) {
+            DrawerRowItem obj = mDrawerRowItemList.get(i);
+            if (i == 0) {
+                obj.setmActive(true);
+            } else {
+                obj.setmActive(false);
+            }
+        }
+
+        mAdapter.notifyDataSetChanged();
     }
 
     public void selectItem(int position, Bundle b) {
@@ -320,14 +477,14 @@ public class CrkMainActivity extends AppCompatActivity implements LoaderManager.
 
         switch (position) {
             case 4:
-                Intent i = new Intent(CrkMainActivity.this, ContactUsActivity.class);
+                Intent i = new Intent(CrkModifiedMainActivity.this, ContactUsActivity.class);
                 i.putExtras(b);
                 startActivityForResult(i, CONTACTUS_ACTIVITY_START_CODE);
                 overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_right);
                 Drawer.closeDrawer(Gravity.LEFT);
                 break;
-            case 5:
-                Intent i1 = new Intent(CrkMainActivity.this, ServicesActivity.class);
+            case 3:
+                Intent i1 = new Intent(CrkModifiedMainActivity.this, ServicesActivity.class);
                 i1.putExtras(b);
                 startActivityForResult(i1, SERVICES_ACTIVITY_START_CODE);
                 overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_right);
@@ -344,7 +501,7 @@ public class CrkMainActivity extends AppCompatActivity implements LoaderManager.
         super.onResume();
 
         if (mAlarmReceiver != null) {
-            mAlarmReceiver.setAlarm(CrkMainActivity.this);
+            mAlarmReceiver.setAlarm(CrkModifiedMainActivity.this);
         }
 
     }
@@ -370,15 +527,18 @@ public class CrkMainActivity extends AppCompatActivity implements LoaderManager.
         ViewPagerAdapter adapter = new ViewPagerAdapter(getSupportFragmentManager());
 
 
-        SlidingTabsBasicFragment slidingTabsBasicFragment = new SlidingTabsBasicFragment();
+    /*    SlidingTabsBasicFragment slidingTabsBasicFragment = new SlidingTabsBasicFragment();
         adapter.addFragment(slidingTabsBasicFragment, "Insights");
         ArrayList<String> list = new ArrayList<>();
         list.add("Latest News");
         list.add("Statuory Happenings");
-        list.add("Case Laws");
+        list.add("Case Laws");*/
         // list.add("Articles");
         // list.add("News");
-        slidingTabsBasicFragment.initializeSlidingTabs(list);
+        //slidingTabsBasicFragment.initializeSlidingTabs(list);
+
+        CrkRSSFragment rssfragment = new CrkRSSFragment();
+        adapter.addFragment(rssfragment,"Rss Fragment");
 
 
         CrkHomeFragment fragment = new CrkHomeFragment();
@@ -1177,7 +1337,7 @@ public class CrkMainActivity extends AppCompatActivity implements LoaderManager.
 
 
                     if (Utility.getInstance().isDebug()) {
-                        Log.v("TAG","" + responseString.toString());
+                        Log.v("TAG", "" + responseString.toString());
                     }
 
                     if (syncTableVar == 0) {
@@ -1308,7 +1468,7 @@ public class CrkMainActivity extends AppCompatActivity implements LoaderManager.
                                 servicesListItem.setDescription(description);
                                 servicesListItem.setCategoryId(categoryid);
                                 servicesListItem.setCategory(categoryName);
-                                if(categoryid.equalsIgnoreCase("0")) {
+                                if (categoryid.equalsIgnoreCase("0")) {
                                     servicesListItem.setHeader("true");
                                 }
                                 arrayList.add(servicesListItem);
@@ -1342,22 +1502,21 @@ public class CrkMainActivity extends AppCompatActivity implements LoaderManager.
                     getDataFromDB(3);
 
 
-
                 }
             } else {
 
                 if (mConnectionCode >= HttpURLConnection.HTTP_INTERNAL_ERROR) {
-                    Toast.makeText(CrkMainActivity.this, "Internal Server Error", Toast.LENGTH_LONG).show();
+                    Toast.makeText(CrkModifiedMainActivity.this, "Internal Server Error", Toast.LENGTH_LONG).show();
 
 
                 } else if (mConnectionCode >= HttpURLConnection.HTTP_BAD_REQUEST && mConnectionCode < HttpURLConnection.HTTP_INTERNAL_ERROR) {
 
-                    Toast.makeText(CrkMainActivity.this, "Client Side Error", Toast.LENGTH_LONG).show();
+                    Toast.makeText(CrkModifiedMainActivity.this, "Client Side Error", Toast.LENGTH_LONG).show();
 
 
                 } else if (mConnectionCode >= HttpURLConnection.HTTP_MULT_CHOICE && mConnectionCode < HttpURLConnection.HTTP_BAD_REQUEST) {
 
-                    Toast.makeText(CrkMainActivity.this, "Server Page is temp moved", Toast.LENGTH_LONG).show();
+                    Toast.makeText(CrkModifiedMainActivity.this, "Server Page is temp moved", Toast.LENGTH_LONG).show();
 
                 }
             }
@@ -1420,7 +1579,7 @@ public class CrkMainActivity extends AppCompatActivity implements LoaderManager.
     protected void onDestroy() {
         super.onDestroy();
         if (mAlarmReceiver != null) {
-            mAlarmReceiver.cancelAlarm(CrkMainActivity.this);
+            mAlarmReceiver.cancelAlarm(CrkModifiedMainActivity.this);
         }
     }
 

@@ -4,6 +4,7 @@
               android:layout_height="match_parent"
               android:orientation="vertical">
 
+
     <com.relsellglobal.crk.app.common.view.SlidingTabLayout
         android:id="@+id/sliding_tabs"
         android:layout_width="match_parent"
