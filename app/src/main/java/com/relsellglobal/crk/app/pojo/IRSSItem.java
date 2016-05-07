@@ -7,4 +7,5 @@ public interface IRSSItem {
     public String getLink();
     public String getTitle();
     public String getPubDate();
+    public String getDescription();
 }

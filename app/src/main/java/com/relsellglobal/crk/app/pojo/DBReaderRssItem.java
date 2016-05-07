@@ -3,27 +3,35 @@ package com.relsellglobal.crk.app.pojo;
 /**
  * Created by anilkukreti on 05/02/16.
  */
-public class RSSItem2 implements IRSSItem{
+public class DBReaderRssItem implements IRSSItem {
     private String title;
     private String link;
     private String category;
+    private String categoryId;
     private String author;
     private String pubDate;
     private String guid;
-    private String summary;
+    private String description;
     private String mediaThumbnail;
     private String thr;
     private String feedBurnerLink;
-    private String description;
+    private boolean isSectionHeader;
 
 
-    @Override
-    public String getDescription() {
-        return description;
+    public boolean isSectionHeader() {
+        return isSectionHeader;
     }
 
-    public void setDescription(String description) {
-        this.description = description;
+    public void setSectionHeader(boolean myHeader) {
+        isSectionHeader = myHeader;
+    }
+
+    public String getCategoryId() {
+        return categoryId;
+    }
+
+    public void setCategoryId(String categoryId) {
+        this.categoryId = categoryId;
     }
 
     public String getTitle() {
@@ -74,12 +82,12 @@ public class RSSItem2 implements IRSSItem{
         this.guid = guid;
     }
 
-    public String getSummary() {
-        return summary;
+    public String getDescription() {
+        return description;
     }
 
-    public void setSummary(String summary) {
-        this.summary = summary;
+    public void setDescription(String description) {
+        this.description = description;
     }
 
     public String getMediaThumbnail() {

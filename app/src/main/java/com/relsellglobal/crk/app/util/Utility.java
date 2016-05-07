@@ -10,7 +10,9 @@ import android.widget.Toast;
 import com.relsellglobal.crk.app.CrkMainActivity;
 import com.relsellglobal.crk.app.contentproviders.QuotesProvider;
 import com.relsellglobal.crk.app.pojo.ContactUsListItem;
+import com.relsellglobal.crk.app.pojo.DBReaderRssItem;
 import com.relsellglobal.crk.app.pojo.QuotesListItem;
+import com.relsellglobal.crk.app.pojo.RSSItem;
 import com.relsellglobal.crk.app.pojo.ServicesListItem;
 
 import java.io.File;
@@ -38,6 +40,19 @@ public class Utility extends Application {
     private ArrayList<ServicesListItem> mListForServicesData;
 
     private ArrayList<ContactUsListItem> mListForContactUsData;
+
+    private ArrayList<DBReaderRssItem> mListForRssData;
+
+
+
+
+    public ArrayList<DBReaderRssItem> getmListForRssData() {
+        return mListForRssData;
+    }
+
+    public void setmListForRssData(ArrayList<DBReaderRssItem> mListForRssData) {
+        this.mListForRssData = mListForRssData;
+    }
 
     public boolean isDebug() {
         return debug;

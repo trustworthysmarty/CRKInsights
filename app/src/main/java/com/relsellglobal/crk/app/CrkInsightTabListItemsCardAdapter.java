@@ -11,8 +11,11 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 
+import com.relsellglobal.crk.app.pojo.DBReaderRssItem;
 import com.relsellglobal.crk.app.pojo.DrawerRowItem;
 import com.relsellglobal.crk.app.pojo.QuotesListItem;
+
+import org.w3c.dom.Text;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,7 +27,7 @@ import java.util.List;
 public class CrkInsightTabListItemsCardAdapter extends RecyclerView.Adapter<CrkInsightTabListItemsCardAdapter.ViewHolder> {
 
     private Context mContext;
-    List<DrawerRowItem> list = new ArrayList<>();
+    List<DBReaderRssItem> list = new ArrayList<>();
     FragmentManager fragmentManager;
     int containerLayoutId;
     Typeface tf ;
@@ -32,7 +35,7 @@ public class CrkInsightTabListItemsCardAdapter extends RecyclerView.Adapter<CrkI
     public static final int CHILD = 2;
 
 
-    public CrkInsightTabListItemsCardAdapter(Context mContext, List<DrawerRowItem> list, FragmentManager fm, int containerLayoutId) {
+    public CrkInsightTabListItemsCardAdapter(Context mContext, List<DBReaderRssItem> list, FragmentManager fm, int containerLayoutId) {
         this.mContext = mContext;
         this.list = list;
         this.fragmentManager = fm;
@@ -49,7 +52,7 @@ public class CrkInsightTabListItemsCardAdapter extends RecyclerView.Adapter<CrkI
         switch(viewType) {
             case HEADER:
                 itemView = LayoutInflater.from(parent.getContext())
-                        .inflate(R.layout.crk_homefragment_listitem, parent, false);
+                        .inflate(R.layout.section_header_layout, parent, false);
                 return new ViewHolder(itemView,HEADER);
             case CHILD:
                 itemView = LayoutInflater.from(parent.getContext())
@@ -68,10 +71,11 @@ public class CrkInsightTabListItemsCardAdapter extends RecyclerView.Adapter<CrkI
         switch (viewType) {
             case CHILD:
 
-                final DrawerRowItem localObj = list.get(position);
+                final DBReaderRssItem localObj = list.get(position);
 
-                holder.cardtitle.setText(localObj.getmTitle());
-
+                holder.cardHeading.setText(localObj.getTitle());
+                holder.cardtitle.setText(localObj.getDescription());
+                holder.publishedDateTV.setText(localObj.getPubDate());
 
                 holder.downloadButtonLayout.setOnClickListener(new View.OnClickListener() {
                     @Override
@@ -97,7 +101,7 @@ public class CrkInsightTabListItemsCardAdapter extends RecyclerView.Adapter<CrkI
         return list.size();
     }
 
-    public DrawerRowItem getItem(int i) {
+    public DBReaderRssItem getItem(int i) {
         return list.get(i);
     }
 
@@ -109,18 +113,22 @@ public class CrkInsightTabListItemsCardAdapter extends RecyclerView.Adapter<CrkI
 
     public class ViewHolder extends RecyclerView.ViewHolder {
 
+        TextView cardHeading;
         TextView cardtitle;
         TextView quoteAuthor;
         LinearLayout downloadButtonLayout;
+        TextView publishedDateTV;
 
         public ViewHolder(View itemView,int type) {
             super(itemView);
             switch(type) {
                 case CHILD:
-                    cardtitle = (TextView) itemView.findViewById(R.id.cardtitle);
+                    cardHeading = (TextView)itemView.findViewById(R.id.cardttitle);
+                    cardtitle = (TextView) itemView.findViewById(R.id.card_desc);
                     cardtitle.setTypeface(tf);
                     quoteAuthor = (TextView) itemView.findViewById(R.id.author);
                     downloadButtonLayout = (LinearLayout)itemView.findViewById(R.id.downloadBtnLayout);
+                    publishedDateTV  = (TextView)itemView.findViewById(R.id.pubDate);
                     break;
                 default:
                     break;
@@ -132,12 +140,9 @@ public class CrkInsightTabListItemsCardAdapter extends RecyclerView.Adapter<CrkI
 
     @Override
     public int getItemViewType(int position) {
-        switch (position) {
-            case 0:
-                return CHILD;
-            default:
-                return CHILD;
-        }
+        DBReaderRssItem item = list.get(position);
+        int res = item.isSectionHeader() ? HEADER : CHILD;
+        return res;
     }
 }
 

@@ -1,6 +1,8 @@
 package com.relsellglobal.crk.app;
 
 
+import android.content.ContentValues;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -18,9 +20,11 @@ import android.widget.LinearLayout;
 import android.widget.ListView;
 
 
+import com.relsellglobal.crk.app.contentproviders.QuotesProvider;
 import com.relsellglobal.crk.app.pojo.DrawerHeaderItem;
 import com.relsellglobal.crk.app.pojo.DrawerRowItem;
 import com.relsellglobal.crk.app.pojo.IRSSItem;
+import com.relsellglobal.crk.app.pojo.QuotesListItem;
 import com.relsellglobal.crk.app.pojo.RSSItemListToDrawerRowItemListConverter;
 import com.relsellglobal.crk.app.rssreader.IRSSHandler;
 import com.relsellglobal.crk.app.rssreader.RSSHandleXml;
@@ -55,6 +59,8 @@ public class CrkRSSFragment extends Fragment {
 
 
     private String finalUrl="https://www.taxmann.com/rss/news.ashx";
+    String category = "Statutory Warnings";
+    String categoryId = "1";
     private String pageTitle = "Demo Page";
     private IRSSHandler obj;
     private int xmlHandler = 1;
@@ -68,6 +74,7 @@ public class CrkRSSFragment extends Fragment {
                 RSSItemListToDrawerRowItemListConverter localObj = new RSSItemListToDrawerRowItemListConverter();
                 localObj.setDrawerRowItemArrayList(mDrawerRowItemList);
                 localObj.setRssItemArrayList(mItemList);
+                writeRssDataToDb(mItemList);
                 mDrawerRowItemList = localObj.getDrawerRowItemArrayList();
                 if(mDrawerRowItemList != null && mDrawerRowItemList.size() != 0) {
                     mLinearLayoutForNoFeed.setVisibility(View.GONE);
@@ -77,6 +84,23 @@ public class CrkRSSFragment extends Fragment {
 
         }
     };
+
+    public void writeRssDataToDb(  ArrayList<IRSSItem> itemList) {
+        System.out.println("Writing Data to Rss DB ");
+        for (IRSSItem obj : itemList) {
+            ContentValues values = new ContentValues();
+            values.put(QuotesProvider.RSSItemsTable.DESC, obj.getDescription());
+            values.put(QuotesProvider.RSSItemsTable.CATEGORY,category);
+            values.put(QuotesProvider.RSSItemsTable.CATEGORY_ID,categoryId);
+            values.put(QuotesProvider.RSSItemsTable.PUBDATE, obj.getPubDate());
+            values.put(QuotesProvider.RSSItemsTable.TITLE, obj.getTitle());
+            values.put(QuotesProvider.RSSItemsTable.LINK, obj.getLink());
+            Uri uri = getContext().getContentResolver().insert(QuotesProvider.RSSItemsTable.CONTENT_URI,
+                    values);
+        }
+
+    }
+
 
 
 
@@ -192,8 +216,8 @@ public class CrkRSSFragment extends Fragment {
             obj.fetchXML();
         }
        // mAdapter = new FirstSectionAdapter(getActivity(), mDrawerHeaderItemList, mDrawerRowItemList);
-        mAdapter = new CrkInsightTabListItemsCardAdapter(getActivity(), mDrawerRowItemList, getActivity().getSupportFragmentManager(),1);
-        mRecyclerView.setAdapter(mAdapter);
+        /*mAdapter = new CrkInsightTabListItemsCardAdapter(getActivity(), mDrawerRowItemList, getActivity().getSupportFragmentManager(),1);
+        mRecyclerView.setAdapter(mAdapter);*/
     }
 
 

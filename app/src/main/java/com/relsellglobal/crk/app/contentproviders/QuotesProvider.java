@@ -63,16 +63,31 @@ public class QuotesProvider extends ContentProvider {
         public static final String UPDATE_TIME = "Update_time";
     }
 
+    public static class RSSItemsTable {
+        public static final String URL = "content://" + PROVIDER_NAME + "/rssitemstable";
+        public static final Uri CONTENT_URI = Uri.parse(URL);
+        public static final String _ID = "_id";
+        public static final String TITLE = "title";
+        public static final String DESC = "desc";
+        public static final String LINK = "link";
+        public static final String PUBDATE = "pubdate";
+        public static final String CATEGORY = "category";
+        public static final String CATEGORY_ID = "category_id";
+
+    }
+
 
     private static HashMap<String, String> QUOTES_PROJECTION_MAP;
     private static HashMap<String, String> SERVICES_PROJECTION_MAP;
     private static HashMap<String, String> CONTACTUS_PROJECTION_MAP;
     private static HashMap<String, String> METADATA_PROJECTION_MAP;
+    private static HashMap<String, String> RSSITEMS_PROJECTION_MAP;
 
     static final int QUOTE = 1;
     static final int SERVICES = 2;
     static final int CONTACTUS = 3;
     static final int METADATA = 4;
+    static final int RSSITEMS = 5;
 
 
     static final UriMatcher uriMatcher;
@@ -83,6 +98,7 @@ public class QuotesProvider extends ContentProvider {
         uriMatcher.addURI(PROVIDER_NAME, "servicestable", SERVICES);
         uriMatcher.addURI(PROVIDER_NAME, "contactustable", CONTACTUS);
         uriMatcher.addURI(PROVIDER_NAME, "metadatatable", METADATA);
+        uriMatcher.addURI(PROVIDER_NAME, "rssitemstable", RSSITEMS);
     }
 
     /**
@@ -94,8 +110,20 @@ public class QuotesProvider extends ContentProvider {
     public static final String SERVICES_TABLE_NAME = "servicestable";
     public static final String CONTACTUS_TABLE_NAME = "contactustable";
     public static final String METADATA_TABLE_NAME = "metadatatable";
+    public static final String RSSITEMS_TABLE_NAME = "rssitemstable";
     static final int DATABASE_VERSION = 6;
 
+
+
+    static final String CREATE_RSSITEMS_DB_TABLE =
+            " CREATE TABLE " + RSSITEMS_TABLE_NAME +
+                    " (" + RSSItemsTable._ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                    RSSItemsTable.TITLE + " TEXT NOT NULL, " +
+                    RSSItemsTable.LINK + " TEXT NOT NULL, " +
+                    RSSItemsTable.DESC + " TEXT NOT NULL, " +
+                    RSSItemsTable.PUBDATE + " TEXT NOT NULL, " +
+                    RSSItemsTable.CATEGORY + " TEXT, " +
+                    RSSItemsTable.CATEGORY_ID + "  TEXT NOT NULL);";
 
     static final String CREATE_META_DATA_DB_TABLE =
             " CREATE TABLE " + METADATA_TABLE_NAME +
@@ -144,6 +172,7 @@ public class QuotesProvider extends ContentProvider {
             db.execSQL(CREATE_SERVICES_DB_TABLE);
             db.execSQL(CREATE_CONTACTUS_DB_TABLE);
             db.execSQL(CREATE_META_DATA_DB_TABLE);
+            db.execSQL(CREATE_RSSITEMS_DB_TABLE);
         }
 
         @Override
@@ -153,6 +182,7 @@ public class QuotesProvider extends ContentProvider {
             db.execSQL("DROP TABLE IF EXISTS " + SERVICES_TABLE_NAME);
             db.execSQL("DROP TABLE IF EXISTS " + CONTACTUS_TABLE_NAME);
             db.execSQL("DROP TABLE IF EXISTS " + METADATA_TABLE_NAME);
+            db.execSQL("DROP TABLE IF EXISTS " + RSSITEMS_TABLE_NAME);
             onCreate(db);
         }
     }
@@ -226,6 +256,16 @@ public class QuotesProvider extends ContentProvider {
                }
                return _uri;
            }
+       }  else if(tableName.equalsIgnoreCase(RSSITEMS_TABLE_NAME)) {
+           long rowID = db.insert(tableName, "", values);
+           if (rowID > 0) {
+               Uri _uri = ContentUris.withAppendedId(RSSItemsTable.CONTENT_URI, rowID);
+               ContentResolver cr = getContext().getContentResolver();
+               if(cr != null) {
+                   cr.notifyChange(_uri, null);
+               }
+               return _uri;
+           }
        }
         return null;
     }
@@ -253,6 +293,10 @@ public class QuotesProvider extends ContentProvider {
             case METADATA:
                 qb.setTables(METADATA_TABLE_NAME);
                 qb.setProjectionMap(METADATA_PROJECTION_MAP);
+                break;
+            case RSSITEMS:
+                qb.setTables(RSSITEMS_TABLE_NAME);
+                qb.setProjectionMap(RSSITEMS_PROJECTION_MAP);
                 break;
             default:
                 throw new IllegalArgumentException("Unknown URI While query" + uri);
@@ -290,6 +334,9 @@ public class QuotesProvider extends ContentProvider {
             case METADATA:
                 count = db.delete(METADATA_TABLE_NAME, selection, selectionArgs);
                 break;
+            case RSSITEMS:
+                count = db.delete(RSSITEMS_TABLE_NAME, selection, selectionArgs);
+                break;
             default:
                 throw new IllegalArgumentException("Unknown URI " + uri);
         }
@@ -319,6 +366,10 @@ public class QuotesProvider extends ContentProvider {
                 count = db.update(METADATA_TABLE_NAME, values,
                         selection, selectionArgs);
                 break;
+            case RSSITEMS:
+                count = db.update(RSSITEMS_TABLE_NAME, values,
+                        selection, selectionArgs);
+                break;
             default:
                 throw new IllegalArgumentException("Unknown URI while updating" + uri);
         }
@@ -346,6 +397,9 @@ public class QuotesProvider extends ContentProvider {
                 break;
             case METADATA:
                 result = METADATA_TABLE_NAME;
+                break;
+            case RSSITEMS:
+                result = RSSITEMS_TABLE_NAME;
                 break;
             default:
                 throw new IllegalArgumentException("Unsupported URI Name in table: " + uri);

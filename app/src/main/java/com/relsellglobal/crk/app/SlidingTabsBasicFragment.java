@@ -30,6 +30,7 @@ import android.view.animation.AnimationUtils;
 import android.widget.ProgressBar;
 
 import com.relsellglobal.crk.app.common.view.SlidingTabLayout;
+import com.relsellglobal.crk.app.pojo.DBReaderRssItem;
 import com.relsellglobal.crk.app.pojo.QuotesListItem;
 import com.relsellglobal.crk.app.util.Utility;
 
@@ -141,30 +142,36 @@ public class SlidingTabsBasicFragment extends Fragment {
             recyclerView = (RecyclerView)view.findViewById(R.id.recyclerView);
             ProgressBar pb = (ProgressBar)view.findViewById(R.id.progressBar);
 
-            categoryNo = 1;
+
+            if(position == 0) {
+                categoryNo = 1;
+            } else if(position == 1) {
+                categoryNo = 2;
+            } else if (position == 2) {
+                categoryNo = 3;
+            }
 
             LinearLayoutManager llm = new LinearLayoutManager(getActivity());
             llm.setOrientation(LinearLayoutManager.VERTICAL);
             recyclerView.setLayoutManager(llm);
             recyclerView.setHasFixedSize(true);
             //initializeData();
-            ArrayList<QuotesListItem> list = Utility.getInstance().getmListForStationaryQuotesData();
-            ArrayList<QuotesListItem> modifiedList = new ArrayList();
+            ArrayList<DBReaderRssItem> list = Utility.getInstance().getmListForRssData();
+            ArrayList<DBReaderRssItem> modifiedList = new ArrayList<> ();
             if(list != null) {
-                for(QuotesListItem localObj : list) {
-                    int localCategoryId = Integer.parseInt(localObj.getCategoryId());
-                    if(localCategoryId == categoryNo) {
+                for(DBReaderRssItem localObj : list) {
+                    if(localObj.getCategoryId().equalsIgnoreCase(""+categoryNo)) {
                         modifiedList.add(localObj);
                     }
                 }
             }
             if(modifiedList != null) {
                 pb.setVisibility(View.GONE);
-                Animation a = AnimationUtils.loadAnimation(getContext(),R.anim.slide_in_up);
+                //Animation a = AnimationUtils.loadAnimation(getContext(),R.anim.slide_in_up);
                 recyclerView.setVisibility(View.VISIBLE);
-                recyclerView.startAnimation(a);
-                /*adapter = new CrkInsightTabListItemsCardAdapter(getActivity(), modifiedList, getActivity().getSupportFragmentManager(), categoryNo);*/
-                //recyclerView.setAdapter(adapter);
+                //recyclerView.startAnimation(a);
+                adapter = new CrkInsightTabListItemsCardAdapter(getActivity(), modifiedList, getActivity().getSupportFragmentManager(), categoryNo);
+                recyclerView.setAdapter(adapter);
             }
 
 

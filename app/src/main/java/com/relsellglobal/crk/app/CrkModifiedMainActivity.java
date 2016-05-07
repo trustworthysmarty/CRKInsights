@@ -41,11 +41,15 @@ import android.widget.Toast;
 import com.relsellglobal.crk.app.contentproviders.QuotesProvider;
 import com.relsellglobal.crk.app.customcomponents.NonSwipableViewPager;
 import com.relsellglobal.crk.app.pojo.ContactUsListItem;
+import com.relsellglobal.crk.app.pojo.DBReaderRssItem;
 import com.relsellglobal.crk.app.pojo.DrawerHeaderItem;
 import com.relsellglobal.crk.app.pojo.DrawerRowItem;
+import com.relsellglobal.crk.app.pojo.IRSSItem;
 import com.relsellglobal.crk.app.pojo.QuotesListItem;
+import com.relsellglobal.crk.app.pojo.RSSItem;
 import com.relsellglobal.crk.app.pojo.ServicesListItem;
 import com.relsellglobal.crk.app.pojo.TableMetaDataItem;
+import com.relsellglobal.crk.app.smartsync.SmartSyncRSSTableTask;
 import com.relsellglobal.crk.app.smartsync.SmartSyncTableTask;
 import com.relsellglobal.crk.app.util.Utility;
 
@@ -288,6 +292,7 @@ public class CrkModifiedMainActivity extends AppCompatActivity implements Loader
         getDataFromDB(1);
         getDataFromDB(2);    // services table
         getDataFromDB(3);    // contact us table
+        getDataFromDB(4);   // get RSS Data from DB
 
 
         //   }
@@ -434,11 +439,44 @@ public class CrkModifiedMainActivity extends AppCompatActivity implements Loader
             // start sync request here
             // lets start with services tab
 
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
+           /* if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
                 new SmartSyncTableTask(null, 2, CrkModifiedMainActivity.this).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
             } else {
                 new SmartSyncTableTask(null, 2, CrkModifiedMainActivity.this).execute();
             }
+
+
+*/
+
+
+            // rss feed url we would be getting from database
+
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
+                new SmartSyncRSSTableTask(1,"News",CrkModifiedMainActivity.this,"https://www.taxmann.com/rss/news.ashx").executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+            } else {
+                new SmartSyncRSSTableTask(1,"News",CrkModifiedMainActivity.this,"https://www.taxmann.com/rss/news.ashx").execute();
+            }
+
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
+                new SmartSyncRSSTableTask(1,"Articles",CrkModifiedMainActivity.this,"https://www.taxmann.com/rss/articles.ashx").executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+            } else {
+                new SmartSyncRSSTableTask(1,"Articles",CrkModifiedMainActivity.this,"https://www.taxmann.com/rss/articles.ashx").execute();
+            }
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
+                new SmartSyncRSSTableTask(2,"Statutory Happenings",CrkModifiedMainActivity.this,"https://www.taxmann.com/rss/statutory-happening.ashx").executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+            } else {
+                new SmartSyncRSSTableTask(2,"Statutory Happenings",CrkModifiedMainActivity.this,"https://www.taxmann.com/rss/statutory-happening.ashx").execute();
+            }
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
+                new SmartSyncRSSTableTask(3,"Case Laws",CrkModifiedMainActivity.this,"https://www.taxmann.com/rss/caselaws.ashx").executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+            } else {
+                new SmartSyncRSSTableTask(3,"Case Laws",CrkModifiedMainActivity.this,"https://www.taxmann.com/rss/caselaws.ashx").execute();
+            }
+
 
             return true;
         }
@@ -450,7 +488,7 @@ public class CrkModifiedMainActivity extends AppCompatActivity implements Loader
     public boolean onPrepareOptionsMenu(Menu menu) {
         MenuItem search = menu.findItem(R.id.search);
         if (Utility.getInstance().isDebug()) {
-            search.setVisible(false);   // when needed i will check sync by making this true
+            search.setVisible(true);   // when needed i will check sync by making this true
         } else {
             search.setVisible(false);
         }
@@ -527,18 +565,18 @@ public class CrkModifiedMainActivity extends AppCompatActivity implements Loader
         ViewPagerAdapter adapter = new ViewPagerAdapter(getSupportFragmentManager());
 
 
-    /*    SlidingTabsBasicFragment slidingTabsBasicFragment = new SlidingTabsBasicFragment();
+        SlidingTabsBasicFragment slidingTabsBasicFragment = new SlidingTabsBasicFragment();
         adapter.addFragment(slidingTabsBasicFragment, "Insights");
         ArrayList<String> list = new ArrayList<>();
         list.add("Latest News");
         list.add("Statuory Happenings");
-        list.add("Case Laws");*/
+        list.add("Case Laws");
         // list.add("Articles");
         // list.add("News");
-        //slidingTabsBasicFragment.initializeSlidingTabs(list);
+        slidingTabsBasicFragment.initializeSlidingTabs(list);
 
-        CrkRSSFragment rssfragment = new CrkRSSFragment();
-        adapter.addFragment(rssfragment,"Rss Fragment");
+       /* CrkRSSFragment rssfragment = new CrkRSSFragment();
+        adapter.addFragment(rssfragment,"Rss Fragment");*/
 
 
         CrkHomeFragment fragment = new CrkHomeFragment();
@@ -548,6 +586,10 @@ public class CrkModifiedMainActivity extends AppCompatActivity implements Loader
         adapter.addFragment(fragment, "Publications");
 
         viewPager.setAdapter(adapter);
+
+
+
+
 
     }
 
@@ -564,6 +606,8 @@ public class CrkModifiedMainActivity extends AppCompatActivity implements Loader
             CONTENT_URI = QuotesProvider.ServicesTable.CONTENT_URI;
         } else if (id == 3) {
             CONTENT_URI = QuotesProvider.ContactsUsTable.CONTENT_URI;
+        } else if (id == 4) {
+            CONTENT_URI = QuotesProvider.RSSItemsTable.CONTENT_URI;
         }
         return new CursorLoader(this, CONTENT_URI, projection, selection, selectionArgs, sortOrder);
     }
@@ -576,6 +620,7 @@ public class CrkModifiedMainActivity extends AppCompatActivity implements Loader
             ArrayList<QuotesListItem> list = new ArrayList<>();
             if (data.getCount() != 0) {
                 while (data.moveToNext()) {
+
                     String desc = data.getString(data.getColumnIndexOrThrow(QuotesProvider.QuotesTable.DESC));
                     String author = data.getString(data.getColumnIndexOrThrow(QuotesProvider.QuotesTable.AUTHOR));
                     String categoryId = data.getString(data.getColumnIndexOrThrow(QuotesProvider.QuotesTable.CATEGORY_ID));
@@ -631,6 +676,36 @@ public class CrkModifiedMainActivity extends AppCompatActivity implements Loader
             if (Utility.getInstance().getmListForContactUsData() == null) {
                 Utility.getInstance().setmListForContactUsData(list);
             }
+        } else if (loader.getId() == 4) {
+            ArrayList<DBReaderRssItem> list = new ArrayList<>();
+            if (data.getCount() != 0) {
+                while (data.moveToNext()) {
+                    String title = data.getString(data.getColumnIndexOrThrow(QuotesProvider.RSSItemsTable.TITLE));
+                    String desc = data.getString(data.getColumnIndexOrThrow(QuotesProvider.RSSItemsTable.DESC));
+                    String categoryName = data.getString(data.getColumnIndexOrThrow(QuotesProvider.RSSItemsTable.CATEGORY));
+                    String categoryId = data.getString(data.getColumnIndexOrThrow(QuotesProvider.RSSItemsTable.CATEGORY_ID));
+                    String pubDate = data.getString(data.getColumnIndexOrThrow(QuotesProvider.RSSItemsTable.PUBDATE));
+
+                    if(!title.equalsIgnoreCase("title_val")) {
+
+                        DBReaderRssItem qt = new DBReaderRssItem();
+                        qt.setTitle(title);
+                        qt.setDescription(desc);
+                        qt.setCategory(categoryName);
+                   /* if(title.equalsIgnoreCase("title_val")) {
+                        qt.setSectionHeader(true);
+                    } else {*/
+                        qt.setSectionHeader(false);
+                        //}
+                        qt.setCategoryId(categoryId);
+                        qt.setPubDate(pubDate);
+                        list.add(qt);
+                    }
+                }
+            }
+            //if (Utility.getInstance().getmListForRssData() == null) {
+                Utility.getInstance().setmListForRssData(list);
+          //  }
         }
     }
 
@@ -698,6 +773,19 @@ public class CrkModifiedMainActivity extends AppCompatActivity implements Loader
                     QuotesProvider.ContactsUsTable.CATEGORY,
                     QuotesProvider.ContactsUsTable.ISHEADER,
                     QuotesProvider.ContactsUsTable.CATEGORY_ID
+            });
+            b.putString("selection", null);
+            b.putStringArray("selectionArgs", null);
+            b.putString("sortOrder", null);
+        } else if (queryNo == 4) {
+            b.putStringArray("projection", new String[]{
+                    QuotesProvider.RSSItemsTable._ID,
+                    QuotesProvider.RSSItemsTable.LINK,
+                    QuotesProvider.RSSItemsTable.DESC,
+                    QuotesProvider.RSSItemsTable.PUBDATE,
+                    QuotesProvider.RSSItemsTable.TITLE,
+                    QuotesProvider.RSSItemsTable.CATEGORY,
+                    QuotesProvider.RSSItemsTable.CATEGORY_ID
             });
             b.putString("selection", null);
             b.putStringArray("selectionArgs", null);
@@ -1500,6 +1588,7 @@ public class CrkModifiedMainActivity extends AppCompatActivity implements Loader
                     getDataFromDB(1);
                     getDataFromDB(2);    // services table
                     getDataFromDB(3);
+
 
 
                 }
