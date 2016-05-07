@@ -466,6 +466,12 @@ public class CrkModifiedMainActivity extends AppCompatActivity implements Loader
             }
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
+                new SmartSyncRSSTableTask(1,"Todays headlines",CrkModifiedMainActivity.this,"http://www.pdicai.org/TodaysHeadlines.aspx?tag=Latest").executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+            } else {
+                new SmartSyncRSSTableTask(1,"Todays headlines",CrkModifiedMainActivity.this,"http://www.pdicai.org/TodaysHeadlines.aspx?tag=Latest").execute();
+            }
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
                 new SmartSyncRSSTableTask(2,"Statutory Happenings",CrkModifiedMainActivity.this,"https://www.taxmann.com/rss/statutory-happening.ashx").executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
             } else {
                 new SmartSyncRSSTableTask(2,"Statutory Happenings",CrkModifiedMainActivity.this,"https://www.taxmann.com/rss/statutory-happening.ashx").execute();
