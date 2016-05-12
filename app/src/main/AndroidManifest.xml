@@ -19,6 +19,7 @@
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
+                <!-- now i will test fork -->
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
 
